@@ -4,7 +4,7 @@ before_script:
     - composer install
 
 cache: 
-    paths
+    paths:
         - vendor/
 
 stages:
@@ -21,7 +21,7 @@ security-checker:
 phpcs:
     stage: CodingRecomandation
     script:
-        - phpcs -v --standard=PSR2 --ignore./src/Kernerl.php ./src
+        - phpcs -v --standard=PSR2 --ignore=./src/Kernel.php ./src
     allow_failure: false
 
 phpstan:

@@ -40,7 +40,8 @@ trait Timestampable
     public function updatedTimestamps()
     {
         if ($this->getCreatedAt() === null)
-                $this->setCreatedAt(new \DateTimeImmutable());
+            $this->setCreatedAt(new \DateTimeImmutable());
         $this->setUpdatedAt(new \DateTimeImmutable());
     }
+    
 }

@@ -4,6 +4,8 @@ namespace App\Entity;
 
 use App\Entity\Traits\Timestampable;
 use App\Repository\UserRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
@@ -45,6 +47,14 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
     #[ORM\Column(length: 30, nullable: true)]
     private ?string $phone = null;
+
+    #[ORM\OneToMany(targetEntity: Trajet::class, mappedBy: 'user')]
+    private Collection $trajets;
+
+    public function __construct()
+    {
+        $this->trajets = new ArrayCollection();
+    }
 
     public function getId(): ?int
     {
@@ -153,6 +163,36 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function setPhone(?string $phone): static
     {
         $this->phone = $phone;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Trajet>
+     */
+    public function getTrajets(): Collection
+    {
+        return $this->trajets;
+    }
+
+    public function addTrajet(Trajet $trajet): static
+    {
+        if (!$this->trajets->contains($trajet)) {
+            $this->trajets->add($trajet);
+            $trajet->setUser($this);
+        }
+
+        return $this;
+    }
+
+    public function removeTrajet(Trajet $trajet): static
+    {
+        if ($this->trajets->removeElement($trajet)) {
+            // set the owning side to null (unless already changed)
+            if ($trajet->getUser() === $this) {
+                $trajet->setUser(null);
+            }
+        }
 
         return $this;
     }

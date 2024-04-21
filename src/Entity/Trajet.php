@@ -2,15 +2,18 @@
 
 namespace App\Entity;
 
+use App\Entity\Traits\CreateCode;
 use App\Entity\Traits\Timestampable;
 use App\Repository\TrajetRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: TrajetRepository::class)]
 class Trajet
 {
-    use Timestampable;
+    use Timestampable, CreateCode;
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
@@ -76,8 +79,13 @@ class Trajet
     #[ORM\ManyToOne(inversedBy: 'trajets')]
     private ?User $user = null;
 
-    #[ORM\Column(nullable: true)]
-    private ?bool $publish = null;
+    #[ORM\OneToMany(targetEntity: Reservation::class, mappedBy: 'trajet')]
+    private Collection $reservations;
+
+    public function __construct()
+    {
+        $this->reservations = new ArrayCollection();
+    }
 
     public function getId(): ?int
     {
@@ -324,14 +332,32 @@ class Trajet
         return $this;
     }
 
-    public function isPublish(): ?bool
+    /**
+     * @return Collection<int, Reservation>
+     */
+    public function getReservations(): Collection
     {
-        return $this->publish;
+        return $this->reservations;
     }
 
-    public function setPublish(?bool $publish): static
+    public function addReservation(Reservation $reservation): static
     {
-        $this->publish = $publish;
+        if (!$this->reservations->contains($reservation)) {
+            $this->reservations->add($reservation);
+            $reservation->setTrajet($this);
+        }
+
+        return $this;
+    }
+
+    public function removeReservation(Reservation $reservation): static
+    {
+        if ($this->reservations->removeElement($reservation)) {
+            // set the owning side to null (unless already changed)
+            if ($reservation->getTrajet() === $this) {
+                $reservation->setTrajet(null);
+            }
+        }
 
         return $this;
     }

@@ -26,13 +26,13 @@ trait CreateCode
         $hashedCodeUser2 = null;
         $pos = 0; $chart = '/'; $tabpt = array(); $tabpos = array(); $tabCode = array();
         do {
-           $pos = strpos($hashedCodeUser, $chart, $pos);
-           if ($pos or $pos === 0) {
+            $pos = strpos($hashedCodeUser, $chart, $pos);
+            if ($pos or $pos === 0) {
                 if ($chart == '/')
-                    $tabpos[] = $pos.'s';
-                else
-                    $tabpt[] = $pos.'p';
-                $pos ++;
+                $tabpos[] = $pos.'s';
+            else
+                $tabpt[] = $pos.'p';
+            $pos ++;
             }elseif ($chart == '/') {
                 $pos = 0; $chart = '.';
                 $pos = strpos($hashedCodeUser, $chart, $pos);

@@ -14,6 +14,7 @@ use Doctrine\ORM\Mapping as ORM;
 class Trajet
 {
     use Timestampable, CreateCode;
+    
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]

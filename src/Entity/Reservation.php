@@ -34,17 +34,11 @@ class Reservation
     #[ORM\Column(type: Types::DECIMAL, precision: 9, scale: 2, nullable: true)]
     private ?string $prixPlaceRsrv = null;
 
-    #[ORM\Column(nullable: true)]
-    private ?\DateTimeImmutable $dateRsrv = null;
-
-    #[ORM\Column(length: 100, nullable: true)]
+   #[ORM\Column(length: 100, nullable: true)]
     private ?string $villeDept = null;
 
     #[ORM\Column(length: 100, nullable: true)]
     private ?string $villeArrv = null;
-
-    #[ORM\Column(length: 10, nullable: true)]
-    private ?string $numTrajet = null;
 
     #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
     private ?\DateTimeInterface $dateDept = null;
@@ -129,18 +123,6 @@ class Reservation
         return $this;
     }
 
-    public function getDateRsrv(): ?\DateTimeImmutable
-    {
-        return $this->dateRsrv;
-    }
-
-    public function setDateRsrv(?\DateTimeImmutable $dateRsrv): static
-    {
-        $this->dateRsrv = $dateRsrv;
-
-        return $this;
-    }
-
     public function getVilleDept(): ?string
     {
         return $this->villeDept;
@@ -161,18 +143,6 @@ class Reservation
     public function setVilleArrv(?string $villeArrv): static
     {
         $this->villeArrv = $villeArrv;
-
-        return $this;
-    }
-
-    public function getNumTrajet(): ?string
-    {
-        return $this->numTrajet;
-    }
-
-    public function setNumTrajet(?string $numTrajet): static
-    {
-        $this->numTrajet = $numTrajet;
 
         return $this;
     }

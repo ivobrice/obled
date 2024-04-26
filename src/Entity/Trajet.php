@@ -9,6 +9,7 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: TrajetRepository::class)]
 #[ORM\HasLifecycleCallbacks]
@@ -22,9 +23,17 @@ class Trajet
     private ?int $id = null;
 
     #[ORM\Column(length: 100, nullable: true)]
+    #[Assert\NotBlank(message: 'Entrer votre ville de départ et le pays départ!')]
+    #[Assert\Length(min: 2, max: 100, 
+    minMessage: 'Le nom de la ville doit avoir au moins {{ limit }} lettres',
+    maxMessage: 'Le nom de la ville doit avoir au plus {{ limit }} lettres')]
     private ?string $villeDept = null;
 
     #[ORM\Column(length: 100, nullable: true)]
+    #[Assert\NotBlank(message: "Entrer la ville d'arrivée et le pays d'arrivée !")]
+    #[Assert\Length(min: 2, max: 100, 
+    minMessage: 'Le nom de la ville doit avoir au moins {{ limit }} lettres',
+    maxMessage: 'Le nom de la ville doit avoir au plus {{ limit }} lettres')]
     private ?string $villeArrv = null;
 
     #[ORM\Column(length: 50, nullable: true)]
@@ -34,6 +43,7 @@ class Trajet
     private ?string $paysArrv = null;
 
     #[ORM\Column(nullable: true)]
+    #[Assert\NotBlank(message: 'Entrer votre date et heure de départ (ex:20/01/2020)')]
     private ?\DateTimeImmutable $dateDept = null;
 
     //#[ORM\Column(length: 255)]
@@ -43,9 +53,13 @@ class Trajet
     private ?int $minuteDept = null;
 
     #[ORM\Column(type: Types::SMALLINT, nullable: true)]
+    #[Assert\NotBlank(message: 'Entrer le nombre de place disponble')]
+    #[Assert\Positive(message: 'Donner un nombre positif différent de zero')]
     private ?int $nbrDePlace = null;
 
     #[ORM\Column(type: Types::DECIMAL, precision: 9, scale: 2, nullable: true)]
+    #[Assert\NotBlank(message: 'Entrer le prix que coûte une place')]
+    #[Assert\PositiveOrZero(message: 'Entrer un nombre positif ou zéro si les places sont gratuites')]
     private ?string $prixPlace = null;
 
     #[ORM\Column(type: Types::TEXT, nullable: true)]

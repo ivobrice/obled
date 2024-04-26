@@ -10,6 +10,7 @@ use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
+use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: UserRepository::class)]
 #[ORM\Table(name: '`user`')]
@@ -25,6 +26,10 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     private ?int $id = null;
 
     #[ORM\Column(length: 180)]
+    #[Assert\NotBlank(message: 'Entrer votre adresse email')]
+    #[Assert\Email(
+        message: 'L\'email {{ value }} n\'est pas une adresse email valide.',
+    )]
     private ?string $email = null;
 
     /**
@@ -37,6 +42,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
      * @var string The hashed password
      */
     #[ORM\Column]
+    #[Assert\NotBlank(message: 'Entrer votre mot de passe')]
     private ?string $password = null;
 
     #[ORM\Column(length: 100, nullable: true)]
@@ -46,6 +52,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     private ?\DateTimeInterface $anneeNaiss = null;
 
     #[ORM\Column(length: 30, nullable: true)]
+    #[Assert\NotBlank(message: 'Entrer votre numéro de téléphone')]
     private ?string $phone = null;
 
     #[ORM\OneToMany(targetEntity: Trajet::class, mappedBy: 'user')]

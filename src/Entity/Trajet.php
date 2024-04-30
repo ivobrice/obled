@@ -10,6 +10,7 @@ use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
+use Symfony\Component\Validator\Context\ExecutionContextInterface;
 
 #[ORM\Entity(repositoryClass: TrajetRepository::class)]
 #[ORM\HasLifecycleCallbacks]
@@ -25,15 +26,15 @@ class Trajet
     #[ORM\Column(length: 100, nullable: true)]
     #[Assert\NotBlank(message: 'Entrer votre ville de départ et le pays départ!')]
     #[Assert\Length(min: 2, max: 100, 
-    minMessage: 'Le nom de la ville doit avoir au moins {{ limit }} lettres',
-    maxMessage: 'Le nom de la ville doit avoir au plus {{ limit }} lettres')]
+    minMessage: 'Le nom de la ville doit avoir au moins {{ limit }} lettres.',
+    maxMessage: 'Le nom de la ville doit avoir au plus {{ limit }} lettres.')]
     private ?string $villeDept = null;
 
     #[ORM\Column(length: 100, nullable: true)]
-    #[Assert\NotBlank(message: "Entrer la ville d'arrivée et le pays d'arrivée !")]
+    #[Assert\NotBlank(message: "Entrer la ville d'arrivée et le pays d'arrivée!")]
     #[Assert\Length(min: 2, max: 100, 
-    minMessage: 'Le nom de la ville doit avoir au moins {{ limit }} lettres',
-    maxMessage: 'Le nom de la ville doit avoir au plus {{ limit }} lettres')]
+    minMessage: 'Le nom de la ville doit avoir au moins {{ limit }} lettres.',
+    maxMessage: 'Le nom de la ville doit avoir au plus {{ limit }} lettres.')]
     private ?string $villeArrv = null;
 
     #[ORM\Column(length: 50, nullable: true)]
@@ -43,26 +44,31 @@ class Trajet
     private ?string $paysArrv = null;
 
     #[ORM\Column(nullable: true)]
-    #[Assert\NotBlank(message: 'Entrer votre date et heure de départ (ex:20/01/2020)')]
+    #[Assert\NotBlank(message: 'Entrer votre date de départ (ex:20/01/2020)')]
     private ?\DateTimeImmutable $dateDept = null;
 
     //#[ORM\Column(length: 255)]
+    #[Assert\NotBlank(message: 'Entrer l\'heure de départ.')]
+    #[Assert\PositiveOrZero(message: 'Donner un nombre chiffre.')]
     private ?int $heureDept = null;
 
     //#[ORM\Column(type: Types::SMALLINT)]
+    #[Assert\NotBlank(message: 'Préciser les minutes.')]
+    #[Assert\PositiveOrZero(message: 'Donner un nombre chiffre.')]
     private ?int $minuteDept = null;
 
     #[ORM\Column(type: Types::SMALLINT, nullable: true)]
-    #[Assert\NotBlank(message: 'Entrer le nombre de place disponble')]
-    #[Assert\Positive(message: 'Donner un nombre positif différent de zero')]
+    #[Assert\NotBlank(message: 'Entrer le nombre de place disponble.')]
+    #[Assert\Positive(message: 'Donner un nombre positif différent de zero.')]
     private ?int $nbrDePlace = null;
 
     #[ORM\Column(type: Types::DECIMAL, precision: 9, scale: 2, nullable: true)]
-    #[Assert\NotBlank(message: 'Entrer le prix que coûte une place')]
-    #[Assert\PositiveOrZero(message: 'Entrer un nombre positif ou zéro si les places sont gratuites')]
+    #[Assert\NotBlank(message: 'Entrer le prix que coûte une place.')]
+    #[Assert\PositiveOrZero(message: 'Entrer un nombre positif ou zéro si les places sont gratuites.')]
     private ?string $prixPlace = null;
 
     #[ORM\Column(type: Types::TEXT, nullable: true)]
+    #[Assert\NotBlank(message: 'Entrer le lieu du rendez-vous avec les passagers au départ.')]
     private ?string $rendezVsDept = null;
 
     #[ORM\Column(length: 120, nullable: true)]
@@ -97,6 +103,7 @@ class Trajet
 
     #[ORM\OneToMany(targetEntity: Reservation::class, mappedBy: 'trajet')]
     private Collection $reservations;
+    private ?string $pattern = null;
 
     public function __construct()
     {
@@ -376,5 +383,30 @@ class Trajet
         }
 
         return $this;
+    }
+
+    #[Assert\Callback]
+    public function isDescriptionValid(ExecutionContextInterface $context): void
+    {
+        // $pattern = "`.*([^1-9])*[1-9]([^1-9])*(([0-9]([^1-9])*){2}){4}`";
+        // On vérifie que le contenu de ne contient pas de Num phone
+        if (preg_match($this->pattern, $this->getDescription())) {  
+            // La règle est violée, on définit l'erreur
+            $context
+            ->buildViolation('Contenu invalide car il contient un numéro de téléphone') //message
+            ->atPath('description')                                                   //attribut de l'objet qui est violé
+            ->addViolation();  //ceci déclenche l'erreur
+        }
+    }
+
+    #[Assert\Callback]
+    public function isRestrictionsValid(ExecutionContextInterface $context): void
+    {
+        if (preg_match($this->pattern, $this->getRestrictions())) {  
+            $context
+            ->buildViolation('Contenu invalide car il contient un numéro de téléphone')
+            ->atPath('restrictions')
+            ->addViolation();
+        }
     }
 }

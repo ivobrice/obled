@@ -103,11 +103,13 @@ class Trajet
 
     #[ORM\OneToMany(targetEntity: Reservation::class, mappedBy: 'trajet')]
     private Collection $reservations;
+
     private ?string $pattern = null;
 
     public function __construct()
     {
         $this->reservations = new ArrayCollection();
+        $this->pattern = "`.*([^1-9])*[1-9]([^1-9])*(([0-9]([^1-9])*){2}){4}`";
     }
 
     public function getId(): ?int

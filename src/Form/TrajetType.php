@@ -10,9 +10,16 @@ use Symfony\Component\Form\Extension\Core\Type\NumberType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
+use Symfony\Bundle\SecurityBundle\Security;
 
 class TrajetType extends AbstractType
 {
+    private $security;
+
+    public  function __construct(Security $security) {
+        $this->security = $security;
+    }
+    
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $builder
@@ -42,8 +49,7 @@ class TrajetType extends AbstractType
                 'label' => 'Prix d\'une place',
                 'required' => false])
             ->add('rendezVsDept', null, [
-                'attr' => ['placeholder' => 'Indiquez le lieu de rendez-vous avec les passagers au départ
-                Ex: Carrefoure Bellecoure'],
+                'attr' => ['placeholder' => 'Ex: Carrefoure Bellecoure'],
                 'label' => 'Lieu de rendez-vous au départ avec les passagers',
                 'required' => false])
             ->add('rendezVsArrv', null, [
@@ -62,31 +68,35 @@ class TrajetType extends AbstractType
             ->add('marqVoiture', null, [
                 'attr' => ['placeholder' => 'Ex: Renault 3000 (Facultatif)'],
                 'label' => 'Marque de votre voiture',
-                'required' => false])
+                'required' => false]);
             // ->add('nbrePlaceArr', null, [
             //     'label' => 'Nombre de place à l\'arrière de votre voiture',
-            //     'required' => false])
-            ->add('prenom', null, [
-                'attr' => ['placeholder' => 'Ex: Kean (Facultatif)'],
-                'label' => 'Prénom',
-                'required' => false])
-            ->add('email', null, [
-                'attr' => ['placeholder' => 'Ex: kean@mail.com (Obligatoire)'],
-                'label' => 'Email',
-                'required' => false])
-            ->add('phone', null, [
-                'attr' => ['placeholder' => 'Ex: 07532214 (Obligatoire)'],
-                'label' => 'Numéro de téléphone',
-                'required' => false])
-            ->add('anneeNaiss', TextType::class, [
-                'attr' => ['placeholder' => 'Ex: 1990 (Facultatif)'],
-                'label' => 'Année de naissance',
-                'required' => false])
+            //     'required' => false]) 
+            if (!$this->security->getUser()) {
+                $builder
+                ->add('prenom', null, [
+                    'attr' => ['placeholder' => 'Ex: Kean (Facultatif)'],
+                    'label' => 'Prénom',
+                    'required' => false])
+                ->add('anneeNaiss', TextType::class, [
+                    'attr' => ['placeholder' => 'Ex: 1990 (Facultatif)'],
+                    'label' => 'Année de naissance',
+                    'required' => false]);
+            }
+            $builder
+                ->add('email', null, [
+                    'attr' => ['placeholder' => 'Ex: kean@mail.com (Obligatoire)'],
+                    'label' => 'Email',
+                    'required' => false])
+                ->add('phone', null, [
+                    'attr' => ['placeholder' => 'Ex: 07532214 (Obligatoire)'],
+                    'label' => 'Numéro de téléphone',
+                    'required' => false]);
+
             // ->add('user', EntityType::class, [
             //     'class' => User::class,
             //     'choice_label' => 'id',
             // ])
-        ;
     }
 
     public function configureOptions(OptionsResolver $resolver): void

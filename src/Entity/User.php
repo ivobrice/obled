@@ -52,7 +52,6 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     private ?\DateTimeInterface $anneeNaiss = null;
 
     #[ORM\Column(length: 30, nullable: true)]
-    #[Assert\NotBlank(message: 'Entrer votre numéro de téléphone')]
     private ?string $phone = null;
 
     #[ORM\OneToMany(targetEntity: Trajet::class, mappedBy: 'user')]

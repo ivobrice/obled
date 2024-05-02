@@ -14,10 +14,10 @@ use Symfony\Bundle\SecurityBundle\Security;
 
 class TrajetType extends AbstractType
 {
-    private $security;
+    private $user;
 
     public  function __construct(Security $security) {
-        $this->security = $security;
+        $this->user = $security->getUser();
     }
     
     public function buildForm(FormBuilderInterface $builder, array $options): void
@@ -57,13 +57,13 @@ class TrajetType extends AbstractType
                 'label' => 'Lieu de dépôt des passagers à l\'arrivée',
                 'required' => false])
             ->add('description', null, [
-                'attr' => ['placeholder' => 'Ex: Je pars dans le sud, j\'ai peu de place dans le coffre...
-                Chaque passager devra avoir un bagage moyen'],
                 'label' => 'Description de votre déplacement',
+                'data' => 'Ex: Je pars dans le sud, j\'ai peu de place dans le coffre...
+                Chaque passager devra avoir un bagage moyen',
                 'required' => false])
             ->add('restrictions', null, [
-                'attr' => ['placeholder' => 'Pas d\'animaux, pas de produits illicites, ni ne pouvant rentrer dans la voiture.'],
-                'label' => 'Restrictions du déplacement',
+                'label' => 'Restrictions lors du déplacement',
+                'data' => 'Pas d\'animaux, pas de produits illicites, ni ne pouvant rentrer dans la voiture.',
                 'required' => false])
             ->add('marqVoiture', null, [
                 'attr' => ['placeholder' => 'Ex: Renault 3000 (Facultatif)'],
@@ -72,7 +72,7 @@ class TrajetType extends AbstractType
             // ->add('nbrePlaceArr', null, [
             //     'label' => 'Nombre de place à l\'arrière de votre voiture',
             //     'required' => false]) 
-            if (!$this->security->getUser()) {
+            if (!$this->user) {
                 $builder
                 ->add('prenom', null, [
                     'attr' => ['placeholder' => 'Ex: Kean (Facultatif)'],
@@ -85,12 +85,14 @@ class TrajetType extends AbstractType
             }
             $builder
                 ->add('email', null, [
-                    'attr' => ['placeholder' => 'Ex: kean@mail.com (Obligatoire)'],
+                    'attr' => ['placeholder' => 'Ex: kean@email.com (Obligatoire)'],
                     'label' => 'Email',
+                    'data' => ($this->user) ? $this->user->getEmail() : '',
                     'required' => false])
                 ->add('phone', null, [
                     'attr' => ['placeholder' => 'Ex: 07532214 (Obligatoire)'],
                     'label' => 'Numéro de téléphone',
+                    'data' => ($this->user) ? $this->user->getPhone() : '',
                     'required' => false]);
 
             // ->add('user', EntityType::class, [

@@ -89,10 +89,15 @@ class Trajet
     #[ORM\Column(length: 100, nullable: true)]
     private ?string $prenom = null;
 
-    #[ORM\Column(length: 180, nullable: true)]
+    #[ORM\Column(length: 180)]
+    #[Assert\NotBlank(message: 'Votre adresse email est indispensable pour recevoir les réservations des passagers')]
+    #[Assert\Email(
+        message: '{{ value }} n\'est pas une adresse email valide.',
+    )]
     private ?string $email = null;
 
     #[ORM\Column(length: 30, nullable: true)]
+    #[Assert\NotBlank(message: 'Votre numéro de téléphone est indispensable pour les passagers')]
     private ?string $phone = null;
 
     #[ORM\Column(type: Types::DATE_MUTABLE, nullable: true)]
@@ -408,6 +413,17 @@ class Trajet
             $context
             ->buildViolation('Contenu invalide car il contient un numéro de téléphone')
             ->atPath('restrictions')
+            ->addViolation();
+        }
+    }
+
+    #[Assert\Callback]
+    public function isPhoneValid(ExecutionContextInterface $context): void
+    {
+        if (preg_match($this->pattern, $this->getPhone())) {  
+            $context
+            ->buildViolation('Numéro de téléphone invalide (Ex: 07532214)')
+            ->atPath('phone')
             ->addViolation();
         }
     }

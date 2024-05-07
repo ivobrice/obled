@@ -17,7 +17,7 @@ use Symfony\Component\Validator\Context\ExecutionContextInterface;
 class Trajet
 {
     use Timestampable, CreateCode;
-    
+
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
@@ -25,16 +25,22 @@ class Trajet
 
     #[ORM\Column(length: 100, nullable: true)]
     #[Assert\NotBlank(message: 'Entrer votre ville de départ et le pays départ!')]
-    #[Assert\Length(min: 2, max: 100, 
-    minMessage: 'Le nom de la ville doit avoir au moins {{ limit }} lettres.',
-    maxMessage: 'Le nom de la ville doit avoir au plus {{ limit }} lettres.')]
+    #[Assert\Length(
+        min: 2,
+        max: 100,
+        minMessage: 'Le nom de la ville doit avoir au moins {{ limit }} lettres.',
+        maxMessage: 'Le nom de la ville doit avoir au plus {{ limit }} lettres.'
+    )]
     private ?string $villeDept = null;
 
     #[ORM\Column(length: 100, nullable: true)]
-    #[Assert\NotBlank(message: "Entrer la ville d'arrivée et le pays d'arrivée!")]
-    #[Assert\Length(min: 2, max: 100, 
-    minMessage: 'Le nom de la ville doit avoir au moins {{ limit }} lettres.',
-    maxMessage: 'Le nom de la ville doit avoir au plus {{ limit }} lettres.')]
+    #[Assert\NotBlank(message: 'Entrer la ville d\'arrivée et le pays d\'arrivée!')]
+    #[Assert\Length(
+        min: 2,
+        max: 100,
+        minMessage: 'Le nom de la ville doit avoir au moins {{ limit }} lettres.',
+        maxMessage: 'Le nom de la ville doit avoir au plus {{ limit }} lettres.'
+    )]
     private ?string $villeArrv = null;
 
     #[ORM\Column(length: 50, nullable: true)]
@@ -115,6 +121,7 @@ class Trajet
     {
         $this->reservations = new ArrayCollection();
         $this->pattern = "`.*([^1-9])*[1-9]([^1-9])*(([0-9]([^1-9])*){2}){4}`";
+        $this->publish = true;
     }
 
     public function getId(): ?int
@@ -397,34 +404,34 @@ class Trajet
     {
         // $pattern = "`.*([^1-9])*[1-9]([^1-9])*(([0-9]([^1-9])*){2}){4}`";
         // On vérifie que le contenu de ne contient pas de Num phone
-        if (preg_match($this->pattern, $this->getDescription())) {  
+        if (preg_match($this->pattern, $this->getDescription())) {
             // La règle est violée, on définit l'erreur
             $context
-            ->buildViolation('Contenu invalide car il contient un numéro de téléphone') //message
-            ->atPath('description')                                                   //attribut de l'objet qui est violé
-            ->addViolation();  //ceci déclenche l'erreur
+                ->buildViolation('Contenu invalide car il contient un numéro de téléphone') //message
+                ->atPath('description')                                                   //attribut de l'objet qui est violé
+                ->addViolation();  //ceci déclenche l'erreur
         }
     }
 
     #[Assert\Callback]
     public function isRestrictionsValid(ExecutionContextInterface $context): void
     {
-        if (preg_match($this->pattern, $this->getRestrictions())) {  
+        if (preg_match($this->pattern, $this->getRestrictions())) {
             $context
-            ->buildViolation('Contenu invalide car il contient un numéro de téléphone')
-            ->atPath('restrictions')
-            ->addViolation();
+                ->buildViolation('Contenu invalide car il contient un numéro de téléphone')
+                ->atPath('restrictions')
+                ->addViolation();
         }
     }
 
     #[Assert\Callback]
     public function isPhoneValid(ExecutionContextInterface $context): void
     {
-        if (preg_match($this->pattern, $this->getPhone())) {  
+        if (preg_match($this->pattern, $this->getPhone())) {
             $context
-            ->buildViolation('Numéro de téléphone invalide (Ex: 07532214)')
-            ->atPath('phone')
-            ->addViolation();
+                ->buildViolation('Numéro de téléphone invalide (Ex: 07532214)')
+                ->atPath('phone')
+                ->addViolation();
         }
     }
 }

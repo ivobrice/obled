@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Entity\Traits;
 
 use Doctrine\ORM\Mapping as ORM;
@@ -7,7 +8,7 @@ trait CreateCode
 {
     #[ORM\Column(nullable: true)]
     private ?bool $publish = null;
-    
+
     #[ORM\Column(length: 20, nullable: true)]
     private ?string $codeUser = null;
 
@@ -17,28 +18,32 @@ trait CreateCode
     #[ORM\Column(length: 45, nullable: true)]
     private ?string $hashedCode2 = null;
 
-  	public function traitCreateCodeUser()
+    public function traitCreateCodeUser()
     {
         $codeUser = uniqid();
         $codeUser = substr($codeUser, 7);
         $hashedCodeUser = password_hash($codeUser, PASSWORD_DEFAULT);
         $hashedCodeUser = substr($hashedCodeUser, 7);
         $hashedCodeUser2 = null;
-        $pos = 0; $chart = '/'; $tabpt = array(); $tabpos = array(); $tabCode = array();
+        $pos = 0;
+        $chart = '/';
+        $tabpt = array();
+        $tabpos = array();
         do {
             $pos = strpos($hashedCodeUser, $chart, $pos);
             if ($pos or $pos === 0) {
                 if ($chart == '/')
-                $tabpos[] = $pos.'s';
-            else
-                $tabpt[] = $pos.'p';
-            $pos ++;
-            }elseif ($chart == '/') {
-                $pos = 0; $chart = '.';
+                    $tabpos[] = $pos . 's';
+                else
+                    $tabpt[] = $pos . 'p';
+                $pos++;
+            } elseif ($chart == '/') {
+                $pos = 0;
+                $chart = '.';
                 $pos = strpos($hashedCodeUser, $chart, $pos);
                 if ($pos or $pos === 0) {
-                    $tabpt[] = $pos.'p';
-                    $pos ++;
+                    $tabpt[] = $pos . 'p';
+                    $pos++;
                 }
             }
         } while ($pos);
@@ -53,8 +58,8 @@ trait CreateCode
                 $hashedCodeUser2 .= implode('', $tabpt);
                 unset($tabpt);
             }
-        }else
-            $hashedCodeUser2 = strlen($hashedCodeUser).'d';
+        } else
+            $hashedCodeUser2 = strlen($hashedCodeUser) . 'd';
         $this->codeUser = $codeUser;
         $this->hashedCode = $hashedCodeUser;
         $this->hashedCode2 = $hashedCodeUser2;

@@ -62,23 +62,23 @@ class TrajetController extends AbstractController
                     $trajet->setUser($this->getUser());
                 }
                 if (empty($id)) {
-                    $hashedCodeConducteur = $trajet->createCodeConducteur();
                     $em->persist($trajet);
-                    $this->addFlash('success', 'Votre trajet à été publié en ligne avec succès');
+                    // $this->addFlash('success', 'Votre trajet à été publié en ligne avec succès');
                 } else {
                     //$trajet->setPublished(true);
                     $this->addFlash('success', 'Votre trajet à été modifié avec succès');
-                    $hashedCodeConducteur = $trajet->getHashedCode();
                 }
-                $em->flush();
-                return $this->redirectToRoute(
-                    'app_affiche_Entity',
-                    [
-                        'page' => 'publication', 'villeDept' => $addDataPost['villeDept'], 'villeArrv' => $addDataPost['villeArrv'],
-                        'id' => $trajet->getId(), 'hashedCode' => $hashedCodeConducteur
-                    ],
-                    Response::HTTP_SEE_OTHER
-                );
+                if ($hashedCodeTrajet = $trajet->getHashedCode()) {
+                    $em->flush();
+                    return $this->redirectToRoute(
+                        'app_affiche_Entity',
+                        [
+                            'page' => 'publication', 'villeDept' => $addDataPost['villeDept'], 'villeArrv' => $addDataPost['villeArrv'],
+                            'id' => $trajet->getId(), 'hashedCode' => $hashedCodeTrajet
+                        ],
+                        Response::HTTP_SEE_OTHER
+                    );
+                }
             }
             $form = $addDataPost['form'];
         }
@@ -143,11 +143,11 @@ class TrajetController extends AbstractController
             $trajet->setPaysDept($Dept['paysDept']);
             $trajet->setPaysArrv($Arrv['paysArrv']);
             $trajet->setDateDept($dateDept);
+            $trajet->setAnneeNaiss(new \DateTime($post['anneeNaiss']));
             $addDataPost['trajet'] = $trajet;
-        } else {
+        } else
             $addDataPost['errorData'] = TRUE;
-            $addDataPost['form'] = $form;
-        }
+        $addDataPost['form'] = $form;
         return $addDataPost;
     }
 
@@ -186,16 +186,16 @@ class TrajetController extends AbstractController
             $date = preg_replace('`^([0-9]{2})/([0-9]{2})/([0-9]{4})$`', "$3-$2-$1", $date);
             if ($heure && $min)
                 $date = $date . ' ' . $heure . ':' . $min;
-            $date = new \Datetime($date);
+            $date = new \DateTimeImmutable($date);
             if ($method == 'Post')
                 return $date;
             else
-                return $date = ($date->diff(new \Datetime())->invert) ? $date : new \Datetime();
+                return $date = ($date->diff(new \DateTimeImmutable())->invert) ? $date : new \DateTimeImmutable();
         } else {
             if ($method == 'Post')
-                return ['msgErrorDate' => 'Donner la date de départ au format: jour/mois/année, et l\'heure de départ.'];
+                return ['msgErrorDate' => 'Donner la date de départ au format (20/01/2020).'];
             else
-                return $date = new \Datetime();
+                return $date = new \DateTimeImmutable();
         }
     }
 }

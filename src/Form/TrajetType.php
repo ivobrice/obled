@@ -37,6 +37,7 @@ class TrajetType extends AbstractType
             ->add('dateDept', TextType::class, [
                 'attr' => ['placeholder' => 'Ex: 29/04/2017'],
                 'label' => 'Votre date de Départ',
+                'mapped' => false,
                 'required' => false
             ])
             ->add('heureDept', null, [
@@ -75,8 +76,8 @@ class TrajetType extends AbstractType
             ])
             ->add('restrictions', null, [
                 'label' => 'Restrictions lors du déplacement',
-                'data' => 'Pas d\'animaux 
-                Pas de produits illicites 
+                'data' => 'Pas d\'animaux
+                Pas de produits illicites
                 Pas d\'objet ne pouvant suffire dans la voiture.',
                 'required' => false
             ])
@@ -98,6 +99,7 @@ class TrajetType extends AbstractType
                 ->add('anneeNaiss', TextType::class, [
                     'attr' => ['placeholder' => 'Ex: 1990 (Facultatif)'],
                     'label' => 'Année de naissance',
+                    'mapped' => false,
                     'required' => false
                 ]);
         }

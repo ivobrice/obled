@@ -12,76 +12,108 @@ class AppFixtures extends Fixture
     {
         for ($i = 0; $i < 5; $i++) {
             if ($i == 0) {
-                $villeDept = 'Lbv';
+                $villeDept = 'LBV';
                 $villeArrv = 'Moanda';
-                $dateDept = new \DateTimeImmutable('2024-06-24');
                 $paysDept = 'Gabon';
                 $paysArrv = 'Gabon';
+                $dateDept = new \DateTimeImmutable('2024-06-24');
                 $nbDePlace = 2;
-                $prixPlace = 23;
+                $prixPlace = 23000;
+                $rendezVsDept = 'Carrefour';
+                $rendezVsArrv = 'Marché';
+                $description = 'Voyage cool';
+                $restrictions = 'Pas d\'animaux';
                 $nbPlaceArr = 2;
                 $marqueVoiture = 'Peugeot 3008';
+                $email = 'Véronica@email.com';
+                $phone = '07201232';
             }
             if ($i == 1) {
                 $villeDept = 'Port-Gentil';
                 $villeArrv = 'Mayumba';
-                $dateDept = new \DateTimeImmutable('2024-07-05 19:57');
                 $paysDept = 'Gabon';
                 $paysArrv = 'Gabon';
+                $dateDept = new \DateTimeImmutable('2024-07-05 19:57');
                 $nbDePlace = 3;
-                $prixPlace = 21;
+                $prixPlace = 21000;
+                $rendezVsDept = 'Carrefour';
+                $rendezVsArrv = 'Marché';
+                $description = 'Voyage leger';
+                $restrictions = 'Pas d\'animaux, non fumeur';
                 $nbPlaceArr = 2;
                 $marqueVoiture = 'Renault Clio';
+                $email = 'amandine@email.com';
+                $phone = '06201232';
             }
             if ($i == 2) {
                 $villeDept = 'Lyon';
                 $villeArrv = 'Toulouse';
-                $dateDept = new \DateTimeImmutable('2024-07-22');
                 $paysDept = 'France';
                 $paysArrv = 'France';
+                $dateDept = new \DateTimeImmutable('2024-07-22');
                 $nbDePlace = 3;
-                $prixPlace = 25;
+                $prixPlace = 25000;
+                $rendezVsDept = 'gare';
+                $rendezVsArrv = 'gare';
+                $description = 'Passager leger';
+                $restrictions = 'Non fumeur';
                 $nbPlaceArr = 2;
                 $marqueVoiture = 'Ford Fiesta';
+                $email = 'ema@email.com';
+                $phone = '07201232';
             }
             if ($i == 3) {
                 $villeDept = 'Lyon';
                 $villeArrv = 'New York État de New York';
-                $dateDept = new \DateTimeImmutable('2024-06-25');
                 $paysDept = 'France';
                 $paysArrv = 'États-Unis';
+                $dateDept = new \DateTimeImmutable('2024-06-25');
                 $nbDePlace = 3;
-                $prixPlace = 29;
+                $prixPlace = 29000;
+                $rendezVsDept = 'Marché';
+                $rendezVsArrv = 'gare';
+                $description = 'Passager leger';
+                $restrictions = 'fumeur';
                 $nbPlaceArr = 2;
                 $marqueVoiture = 'Ford';
+                $email = 'vesna@email.com';
+                $phone = '07101432';
             }
             if ($i == 4) {
                 $villeDept = 'Lyon';
                 $villeArrv = 'Okinawa';
-                $dateDept = new \DateTimeImmutable('2024-08-24');
                 $paysDept = 'France';
                 $paysArrv = 'Japon';
+                $dateDept = new \DateTimeImmutable('2024-08-24');
                 $nbDePlace = 4;
-                $prixPlace = 21;
+                $prixPlace = 21000;
+                $rendezVsDept = 'Marché';
+                $rendezVsArrv = 'Marché';
+                $description = 'Passager leger';
+                $restrictions = 'fumeur';
                 $nbPlaceArr = 2;
                 $marqueVoiture = 'citroen C3';
+                $email = 'deneris@email.com';
+                $phone = '07501131';
             }
-            
+
             $trajet = new Trajet;
             $trajet->setVilleDept($villeDept);
             $trajet->setVilleArrv($villeArrv);
-            $trajet->setDateDept($dateDept);
             $trajet->setPaysDept($paysDept);
             $trajet->setPaysArrv($paysArrv);
+            $trajet->setDateDept($dateDept);
             $trajet->setNbrDePlace($nbDePlace);
             $trajet->setPrixPlace($prixPlace);
+            $trajet->setRendezVsDept($rendezVsDept);
+            $trajet->setRendezVsArrv($rendezVsArrv);
+            $trajet->setDescription($description);
+            $trajet->setRestrictions($restrictions);
             $trajet->setNbrePlaceArr($nbPlaceArr);
-            $trajet->setRendezVsDept('lieu rdv Dept');
-            $trajet->setRendezVsArrv('lieu rdv Arrv');
-            $trajet->setDescription('Je fais un déplacement pour des vacs et voir la famille....N\'ayant que peu d\' affaires, j\'ai de la place et je partage...');
-            $trajet->setRestrictions('-Refus de produits illicites ou illégales, stupéfiants, drogues, Animaux...');
             $trajet->setMarqVoiture($marqueVoiture);
-            
+            $trajet->setEmail($email);
+            $trajet->setPhone($phone);
+
             $manager->persist($trajet);
             unset($trajet);
         }

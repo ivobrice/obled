@@ -131,11 +131,13 @@ class TrajetController extends AbstractController
         $request->request->set('trajet', $post);
         $Dept = $this->formateVille($post['villeDept'], 'Dept', 'Entrer votre ville de départ et le pays départ (ex: Francfort, Allemagne)');
         $Arrv = $this->formateVille($post['villeArrv'], 'Arrv', 'Entrer la ville d\'arrivée et le pays d\'arrivée (ex. Londres, Royaume-Uni)');
-        $dateDept = $this->formateDate($post['dateDept'], $post['heureDept'], $post['minuteDept'], 'Post');
+        $dateDept = $this->formateDate($post['dateDept'], 'Post', $post['heureDept'], $post['minuteDept']);
+        $anneeNaiss = $this->formateDate($post['anneeNaiss']);
         $addDataPost = array_merge($Dept, $Arrv);
         $addDataPost['msgErrorDate'] = (is_array($dateDept)) ? $dateDept['msgErrorDate'] : null;
+        $addDataPost['msgErrorNaiss'] = (is_array($anneeNaiss)) ? $anneeNaiss['msgErrorNaiss'] : null;
         $addDataPost['errorData'] = FALSE;
-        if ($Dept['msgErrorDept'] or $Arrv['msgErrorArrv'] or $addDataPost['msgErrorDate'])
+        if ($Dept['msgErrorDept'] or $Arrv['msgErrorArrv'] or $addDataPost['msgErrorDate'] or $addDataPost['msgErrorNaiss'])
             $addDataPost['errorData'] = TRUE;
         if ($form->handleRequest($request)->isValid() && $form->isSubmitted() && $addDataPost['errorData'] == FALSE) {
             $trajet->setVilleDept($Dept['villeDept']);
@@ -143,7 +145,7 @@ class TrajetController extends AbstractController
             $trajet->setPaysDept($Dept['paysDept']);
             $trajet->setPaysArrv($Arrv['paysArrv']);
             $trajet->setDateDept($dateDept);
-            $trajet->setAnneeNaiss(new \DateTime($post['anneeNaiss']));
+            $trajet->setAnneeNaiss($anneeNaiss);
             $addDataPost['trajet'] = $trajet;
         } else
             $addDataPost['errorData'] = TRUE;
@@ -180,8 +182,12 @@ class TrajetController extends AbstractController
             return ['villeArrv' => $ville, 'paysArrv' => $pays, 'msgErrorArrv' => $msgError];
     }
 
-    public function formateDate($date, $heure = null, $min = null, $method)
+    public function formateDate($date, $method = null, $heure = null, $min = null)
     {
+        if (empty($method)) {
+            $date = (preg_match('`^[0-9]{4}$`', $date)) ? new \DateTime($date) : ['msgErrorNaiss' => 'Donner l\année. ex: 2000'];
+            return $date;
+        }
         if (preg_match('`^([0-9]{2})/([0-9]{2})/([0-9]{4})$`', $date) && ($method == 'GET' or (is_numeric($heure) && is_numeric($min)))) {
             $date = preg_replace('`^([0-9]{2})/([0-9]{2})/([0-9]{4})$`', "$3-$2-$1", $date);
             if ($heure && $min)

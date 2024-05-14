@@ -3,6 +3,7 @@
 namespace App\Controller;
 
 use App\Entity\Trajet;
+use App\Service\GetTrajet;
 use App\Form\TrajetType;
 use App\Repository\TrajetRepository;
 use Doctrine\ORM\EntityManagerInterface;
@@ -45,10 +46,23 @@ class TrajetController extends AbstractController
     }
 
     #[Route('/new', name: 'app_trajet_new', methods: ['GET', 'POST'])]
-    public function new(Request $request, EntityManagerInterface $em): Response
+    public function new(Request $request, GetTrajet $getTrajet, EntityManagerInterface $em): Response
     {
         $addDataPost = FALSE;
         $trajet = new Trajet();
+        if ($request->isMethod('POST')) {
+            if ($request->request->get('codeTrajet')) {
+                if ($trajet = $getTrajet->execute($request)) {
+                    if (!is_object($trajet)) {
+                        // $this->addFlash('warning', $trajet);
+                        return $this->redirectToRoute('app_update_trajet');
+                    }
+                }
+            } elseif (!$request->request->all('trajet')) {
+                // $this->addFlash('warning', 'Pas de trajet avec ce code.')
+                return $this->redirectToRoute('app_update_trajet');
+            }
+        }
         $form = $this->createForm(TrajetType::class, $trajet);
         if ($request->isMethod('POST')) {
             $addDataPost = $this->checkValidityOfValuesPost($request, $form, $trajet);
@@ -61,7 +75,7 @@ class TrajetController extends AbstractController
                     }
                     $trajet->setUser($this->getUser());
                 }
-                if (empty($id)) {
+                if (empty($trajet->getId())) {
                     $em->persist($trajet);
                     // $this->addFlash('success', 'Votre trajet à été publié en ligne avec succès');
                 } else {

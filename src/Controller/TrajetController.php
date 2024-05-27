@@ -4,6 +4,7 @@ namespace App\Controller;
 
 use App\Entity\Trajet;
 use App\Service\GetTrajet;
+use App\Service\BuildHashedCode;
 use App\Form\TrajetType;
 use App\Repository\TrajetRepository;
 use Doctrine\ORM\EntityManagerInterface;
@@ -48,121 +49,124 @@ class TrajetController extends AbstractController
     #[Route('/new', name: 'app_trajet_new', methods: ['GET', 'POST'])]
     public function new(Request $request, GetTrajet $getTrajet, EntityManagerInterface $em): Response
     {
-        $addDataPost = FALSE;
-        $trajet = new Trajet();
-        if ($request->isMethod('POST')) {
-            if ($request->request->get('codeTrajet')) {
-                if ($trajet = $getTrajet->execute($request)) {
-                    if (!is_object($trajet)) {
-                        // $this->addFlash('warning', $trajet);
-                        return $this->redirectToRoute('app_update_trajet');
-                    }
-                }
-            } elseif (!$request->request->all('trajet')) {
-                // $this->addFlash('warning', 'Pas de trajet avec ce code.')
-                return $this->redirectToRoute('app_update_trajet');
-            }
-        }
+        $addDataPost = [];
+        $trajet = (!empty($trajet)) ? $trajet : new Trajet;
         $form = $this->createForm(TrajetType::class, $trajet);
         if ($request->isMethod('POST')) {
-            $addDataPost = $this->checkValidityOfValuesPost($request, $form, $trajet);
-            if ($addDataPost['errorData'] == FALSE) {
+            $addDataPost = $this->checkValidityOfValuesPost($request, $form, $trajet, $em);
+            if ($addDataPost['errorData']) {
                 $trajet = $addDataPost['trajet'];
-                if ($this->getUser()) {
-                    if ($trajet->getNumPhone() != $this->getUser()->getNumPhone()) {
-                        $this->getUser()->setNumPhone($trajet->getNumPhone());
-                        $em->persist($this->getUser());
+                $form = $addDataPost['form'];
+            }
+        }
+        return $this->render('trajet/new.html.twig', ['addDataPost' => $addDataPost, 'trajet' => $trajet, 'form' => $form]);
+    }
+
+    // #[Route('/{id}', name: 'app_trajet_show', methods: ['GET'])]
+    // public function show(Trajet $trajet): Response
+    // {
+    //     return $this->render('trajet/show.html.twig', [
+    //         'trajet' => $trajet,
+    //     ]);
+    // }
+
+    #[Route('/edit', name: 'app_trajet_edit', methods: ['GET', 'POST'])]
+    public function edit(Request $request, GetTrajet $getTrajet, EntityManagerInterface $em): Response
+    {
+        $addDataPost = [];
+        if ($request->isMethod('POST')) {
+            $post = $request->request->all('trajet');
+            if ((count(array_keys($post)) < 5 && isset($post['email']) && isset($post['codeUser'])) or (count(array_keys($post)) > 5 && !empty($post['id']) && !empty($post['hashedCode']))) {
+                if ($trajet = $getTrajet->execute($post, $em)) {
+                    if (!is_object($trajet)) {
+                        $erroModif = $trajet;
+                        $trajet = null;
                     }
-                    $trajet->setUser($this->getUser());
-                }
-                if (empty($trajet->getId())) {
-                    $em->persist($trajet);
-                    // $this->addFlash('success', 'Votre trajet à été publié en ligne avec succès');
-                } else {
-                    //$trajet->setPublished(true);
-                    $this->addFlash('success', 'Votre trajet à été modifié avec succès');
-                }
-                if ($hashedCodeTrajet = $trajet->getHashedCode()) {
-                    $em->flush();
-                    return $this->redirectToRoute(
-                        'app_affiche_Entity',
-                        [
-                            'page' => 'publication', 'villeDept' => $addDataPost['villeDept'], 'villeArrv' => $addDataPost['villeArrv'],
-                            'id' => $trajet->getId(), 'hashedCode' => $hashedCodeTrajet
-                        ],
-                        Response::HTTP_SEE_OTHER
-                    );
                 }
             }
-            $form = $addDataPost['form'];
         }
-
-        return $this->render($trajet->getId() ? 'trajet/edit.html.twig' : 'trajet/new.html.twig', ['addDataPost' => $addDataPost, 'trajet' => $trajet, 'form' => $form]);
-    }
-
-    #[Route('/{id}', name: 'app_trajet_show', methods: ['GET'])]
-    public function show(Trajet $trajet): Response
-    {
-        return $this->render('trajet/show.html.twig', [
-            'trajet' => $trajet,
-        ]);
-    }
-
-    #[Route('/{id}/edit', name: 'app_trajet_edit', methods: ['GET', 'POST'])]
-    public function edit(Request $request, Trajet $trajet, EntityManagerInterface $entityManager): Response
-    {
+        $trajet = (!empty($trajet)) ? $trajet : null;
         $form = $this->createForm(TrajetType::class, $trajet);
-        $form->handleRequest($request);
-
-        if ($form->isSubmitted() && $form->isValid()) {
-            $entityManager->flush();
-
-            return $this->redirectToRoute('app_trajet_index', [], Response::HTTP_SEE_OTHER);
+        if ($request->isMethod('POST')) {
+            if (count(array_keys($post)) > 5 && !empty($post['id']) && !empty($post['hashedCode'])) {
+                $addDataPost = $this->checkValidityOfValuesPost($request, $form, $trajet, $em);
+                if ($addDataPost['errorData']) {
+                    $trajet = $addDataPost['trajet'];
+                    $form = $addDataPost['form'];
+                }
+            }
         }
-
-        return $this->render('trajet/edit.html.twig', [
-            'trajet' => $trajet,
-            'form' => $form,
-        ]);
+        return $this->render($trajet ? 'trajet/new.html.twig' : 'trajet/edit.html.twig', ['trajet' => $trajet, 'form' => $form]);
     }
 
-    #[Route('/{id}', name: 'app_trajet_delete', methods: ['POST'])]
-    public function delete(Request $request, Trajet $trajet, EntityManagerInterface $entityManager): Response
-    {
-        if ($this->isCsrfTokenValid('delete' . $trajet->getId(), $request->request->get('_token'))) {
-            $entityManager->remove($trajet);
-            $entityManager->flush();
-        }
+    // #[Route('/{id}', name: 'app_trajet_delete', methods: ['POST'])]
+    // public function delete(Request $request, Trajet $trajet, EntityManagerInterface $entityManager): Response
+    // {
+    //     if ($this->isCsrfTokenValid('delete' . $trajet->getId(), $request->request->get('_token'))) {
+    //         $entityManager->remove($trajet);
+    //         $entityManager->flush();
+    //     }
 
-        return $this->redirectToRoute('app_trajet_index', [], Response::HTTP_SEE_OTHER);
-    }
+    //     return $this->redirectToRoute('app_trajet_index', [], Response::HTTP_SEE_OTHER);
+    // }
 
-    public function checkValidityOfValuesPost($request, $form, $trajet)
+
+
+    public function checkValidityOfValuesPost($request, $form, $trajet, $em)
     {
         $post = $request->request->all('trajet');
-        foreach ($post as $key => $value)
-            $post[$key] = (is_string($value)) ? nl2br($value) : $value;
+        foreach ($post as $key => $value) {
+            if (is_string($value)) {
+                if ($pos = strpos($value, '\n', 0)) {
+                    if ($pos or $pos === 0) {
+                        $value = nl2br($value);
+                        // $value = str_replace('\n', '', $value);
+                        $post[$key] = $value;
+                    }
+                }
+            }
+        }
         $request->request->set('trajet', $post);
-        $Dept = $this->formateVille($post['villeDept'], 'Dept', 'Entrer votre ville de départ et le pays départ (ex: Francfort, Allemagne)');
-        $Arrv = $this->formateVille($post['villeArrv'], 'Arrv', 'Entrer la ville d\'arrivée et le pays d\'arrivée (ex. Londres, Royaume-Uni)');
+        $dept = $this->formateVille($post['villeDept'], 'Dept', 'Entrer votre ville de départ et le pays départ (ex: Francfort, Allemagne)');
+        $arrv = $this->formateVille($post['villeArrv'], 'Arrv', 'Entrer la ville d\'arrivée et le pays d\'arrivée (ex. Londres, Royaume-Uni)');
         $dateDept = $this->formateDate($post['dateDept'], 'Post', $post['heureDept'], $post['minuteDept']);
         $anneeNaiss = $this->formateDate($post['anneeNaiss']);
-        $addDataPost = array_merge($Dept, $Arrv);
-        $addDataPost['msgErrorDate'] = (is_array($dateDept)) ? $dateDept['msgErrorDate'] : null;
-        $addDataPost['msgErrorNaiss'] = (is_array($anneeNaiss)) ? $anneeNaiss['msgErrorNaiss'] : null;
+        $addDataPost = array_merge($dept, $arrv, $dateDept, $anneeNaiss);
         $addDataPost['errorData'] = FALSE;
-        if ($Dept['msgErrorDept'] or $Arrv['msgErrorArrv'] or $addDataPost['msgErrorDate'] or $addDataPost['msgErrorNaiss'])
+        if ($dept['msgErrorDept'] or $arrv['msgErrorArrv'] or $dateDept['msgErrorDate'] or $anneeNaiss['msgErrorNaiss'])
             $addDataPost['errorData'] = TRUE;
         if ($form->handleRequest($request)->isValid() && $form->isSubmitted() && $addDataPost['errorData'] == FALSE) {
-            $trajet->setVilleDept($Dept['villeDept']);
-            $trajet->setVilleArrv($Arrv['villeArrv']);
-            $trajet->setPaysDept($Dept['paysDept']);
-            $trajet->setPaysArrv($Arrv['paysArrv']);
-            $trajet->setDateDept($dateDept);
-            $trajet->setAnneeNaiss($anneeNaiss);
-            $addDataPost['trajet'] = $trajet;
-        } else
-            $addDataPost['errorData'] = TRUE;
+            $trajet->setVilleDept($dept['villeDept']);
+            $trajet->setVilleArrv($arrv['villeArrv']);
+            $trajet->setPaysDept($dept['paysDept']);
+            $trajet->setPaysArrv($arrv['paysArrv']);
+            $trajet->setDateDept($dateDept['dateDept']);
+            if (empty($anneeNaiss['msgErrorNaiss']))
+                $trajet->setAnneeNaiss($anneeNaiss['anneeNaiss']);
+            if ($this->getUser())
+                $trajet->setUser($this->getUser());
+            if (empty($trajet->getId())) {
+                $em->persist($trajet);
+                // $this->addFlash('success', 'Votre trajet à été publié en ligne avec succès');
+            } else {
+                $trajet->setPublish(true);
+                // $this->addFlash('success', 'Votre trajet à été modifié avec succès');
+            }
+            if ($hashedCodeTrajet = $trajet->getHashedCode()) {
+                $em->flush();
+                dd($trajet);
+                return $this->redirectToRoute(
+                    'app_affiche_Entity',
+                    [
+                        'page' => 'publication', 'villeDept' => $addDataPost['villeDept'], 'villeArrv' => $addDataPost['villeArrv'],
+                        'id' => $trajet->getId(), 'hashedCode' => $hashedCodeTrajet
+                    ],
+                    Response::HTTP_SEE_OTHER
+                );
+            }
+        }
+        $addDataPost['errorData'] = TRUE;
+        $addDataPost['trajet'] = $trajet;
         $addDataPost['form'] = $form;
         return $addDataPost;
     }
@@ -199,8 +203,13 @@ class TrajetController extends AbstractController
     public function formateDate($date, $method = null, $heure = null, $min = null)
     {
         if (empty($method)) {
-            $date = (preg_match('`^[0-9]{4}$`', $date)) ? new \DateTime($date) : ['msgErrorNaiss' => 'Donner l\année. ex: 2000'];
-            return $date;
+            $date = (preg_match('`^[0-9]{4}$`', $date)) ? new \DateTime($date) : $date;
+            if (is_object($date))
+                return ['anneeNaiss' => $date, 'msgErrorNaiss' => null];
+            elseif (empty($date))
+                return ['anneeNaiss' => null, 'msgErrorNaiss' => null];
+            else
+                return ['anneeNaiss' => $date, 'msgErrorNaiss' => 'Donner l\'année. ex: 2000'];
         }
         if (preg_match('`^([0-9]{2})/([0-9]{2})/([0-9]{4})$`', $date) && ($method == 'GET' or (is_numeric($heure) && is_numeric($min)))) {
             $date = preg_replace('`^([0-9]{2})/([0-9]{2})/([0-9]{4})$`', "$3-$2-$1", $date);
@@ -208,12 +217,12 @@ class TrajetController extends AbstractController
                 $date = $date . ' ' . $heure . ':' . $min;
             $date = new \DateTimeImmutable($date);
             if ($method == 'Post')
-                return $date;
+                return ['dateDept' => $date, 'msgErrorDate' => null];
             else
                 return $date = ($date->diff(new \DateTimeImmutable())->invert) ? $date : new \DateTimeImmutable();
         } else {
             if ($method == 'Post')
-                return ['msgErrorDate' => 'Donner la date de départ au format (20/01/2020).'];
+                return ['dateDept' => $date, 'msgErrorDate' => 'Donner la date de départ au format (20/01/2020).'];
             else
                 return $date = new \DateTimeImmutable();
         }

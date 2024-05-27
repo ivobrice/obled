@@ -117,12 +117,11 @@ class Trajet
     #[ORM\OneToMany(targetEntity: Reservation::class, mappedBy: 'trajet')]
     private Collection $reservations;
 
-    private ?string $pattern = null;
+    private ?string $pattern = "`.*([^1-9])*[1-9]([^1-9])*(([0-9]([^1-9])*){2}){3}`";
 
     public function __construct()
     {
         $this->reservations = new ArrayCollection();
-        $this->pattern = "`.*([^1-9])*[1-9]([^1-9])*(([0-9]([^1-9])*){2}){4}`";
         $this->publish = true;
     }
 
@@ -438,14 +437,14 @@ class Trajet
         }
     }
 
-    #[Assert\Callback]
-    public function isPhoneValid(ExecutionContextInterface $context): void
-    {
-        if (preg_match($this->pattern, $this->getPhone())) {
-            $context
-                ->buildViolation('Numéro de téléphone invalide (Ex: 07532214)')
-                ->atPath('phone')
-                ->addViolation();
-        }
-    }
+    // #[Assert\Callback]
+    // public function isPhoneValid(ExecutionContextInterface $context): void
+    // {
+    //     if (preg_match($this->pattern, $this->getPhone())) {
+    //         $context
+    //             ->buildViolation('Numéro de téléphone invalide (Ex: 07532214)')
+    //             ->atPath('phone')
+    //             ->addViolation();
+    //     }
+    // }
 }

@@ -3,24 +3,14 @@
 namespace App\Form;
 
 use App\Entity\Trajet;
-use App\Entity\User;
-use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
-use Symfony\Component\Form\Extension\Core\Type\NumberType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
-use Symfony\Bundle\SecurityBundle\Security;
+use Symfony\Component\Form\Extension\Core\Type\HiddenType;
 
 class TrajetType extends AbstractType
 {
-    private $user;
-
-    public  function __construct(Security $security)
-    {
-        $this->user = $security->getUser();
-    }
-
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $builder
@@ -85,44 +75,37 @@ class TrajetType extends AbstractType
                 'attr' => ['placeholder' => 'Ex: Renault 3000 (Facultatif)'],
                 'label' => 'Marque de votre voiture',
                 'required' => false
-            ]);
-        // ->add('nbrePlaceArr', null, [
-        //     'label' => 'Nombre de place à l\'arrière de votre voiture',
-        //     'required' => false]) 
-        if (!$this->user) {
-            $builder
-                ->add('prenom', null, [
-                    'attr' => ['placeholder' => 'Ex: Kean (Facultatif)'],
-                    'label' => 'Prénom',
-                    'required' => false
-                ])
-                ->add('anneeNaiss', TextType::class, [
-                    'attr' => ['placeholder' => 'Ex: 1990 (Facultatif)'],
-                    'label' => 'Année de naissance',
-                    'mapped' => false,
-                    'required' => false
-                ]);
-        }
-        $builder
+            ])
             ->add('email', null, [
-                'attr' => ['placeholder' => 'Ex: kean@email.com (Obligatoire)'],
-                'label' => 'Email',
-                'data' => ($this->user) ? $this->user->getEmail() : '',
+                'label' => 'Votre email',
                 'help' => 'Obligatoire pour recevoir les réservations des passagers!',
                 'required' => false
             ])
             ->add('phone', null, [
                 'attr' => ['placeholder' => 'Ex: 07532214 (Obligatoire)'],
                 'label' => 'Numéro de téléphone',
-                'data' => ($this->user) ? $this->user->getPhone() : '',
                 'help' => 'Obligatoire pour être contacté par les passagers!',
                 'required' => false
-            ]);
-
-        // ->add('user', EntityType::class, [
-        //     'class' => User::class,
-        //     'choice_label' => 'id',
-        // ])
+            ])
+            ->add('prenom', null, [
+                'attr' => ['placeholder' => 'Ex: Kean (Facultatif)'],
+                'label' => 'Prénom',
+                'required' => false
+            ])
+            ->add('anneeNaiss', TextType::class, [
+                'attr' => ['placeholder' => 'Ex: 1990 (Facultatif)'],
+                'label' => 'Année de naissance',
+                'mapped' => false,
+                'required' => false
+            ])
+            ->add('codeUser', null, [
+                'label' => 'code du trajet',
+                'mapped' => false,
+                'attr' => ['placeholder' => 'Ex: a4dd97eF'],
+                'required' => false
+            ])
+            ->add('id', HiddenType::class, ['mapped' => false])
+            ->add('hashedCode', HiddenType::class, ['mapped' => false]);
     }
 
     public function configureOptions(OptionsResolver $resolver): void

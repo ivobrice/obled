@@ -1,11 +1,22 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}New Trajet{% endblock %}
+{% block title %}
+	{% if trajet.id %}
+		Modifier votre Trajet !
+	{% else %}
+		New Trajet !
+	{% endif %}
+{% endblock %}
 
 {% block body %}
-    <h1>Create new Trajet</h1>
 
-    {{ include('trajet/_form.html.twig') }}
+	{% if trajet.id %}
+		<h1>Modifier votre Trajet</h1>
+		{{ include('trajet/_form.html.twig', {'button_label': 'Update'}) }}
+	{% else %}
+		<h1>Create new Trajet</h1>
+		{{ include('trajet/_form.html.twig') }}
+	{% endif %}
 
-    <a href="{{ path('app_trajet_index') }}">back to list</a>
+	<a href="{{ path('app_trajet_index') }}">back to list</a>
 {% endblock %}

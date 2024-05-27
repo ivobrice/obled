@@ -20,17 +20,17 @@ trait CreateCode
 
     public function traitCreateCodeUser()
     {
-        $codeUser = uniqid();
-        $codeUser = substr($codeUser, 7);
-        $hashedCodeUser = password_hash($codeUser, PASSWORD_DEFAULT);
-        $hashedCodeUser = substr($hashedCodeUser, 7);
-        $hashedCodeUser2 = null;
+        $this->codeUser = uniqid();
+        $this->codeUser = substr($this->codeUser, 7);
+        $this->hashedCode = password_hash($this->codeUser, PASSWORD_DEFAULT);
+        $this->hashedCode = substr($this->hashedCode, 7);
+        $this->hashedCode2 = null;
         $pos = 0;
         $chart = '/';
         $tabpt = array();
         $tabpos = array();
         do {
-            $pos = strpos($hashedCodeUser, $chart, $pos);
+            $pos = strpos($this->hashedCode, $chart, $pos);
             if ($pos or $pos === 0) {
                 if ($chart == '/')
                     $tabpos[] = $pos . 's';
@@ -40,7 +40,7 @@ trait CreateCode
             } elseif ($chart == '/') {
                 $pos = 0;
                 $chart = '.';
-                $pos = strpos($hashedCodeUser, $chart, $pos);
+                $pos = strpos($this->hashedCode, $chart, $pos);
                 if ($pos or $pos === 0) {
                     $tabpt[] = $pos . 'p';
                     $pos++;
@@ -49,20 +49,17 @@ trait CreateCode
         } while ($pos);
         if (!empty($tabpos) or !empty($tabpt)) {
             if (!empty($tabpos)) {
-                $hashedCodeUser = str_replace('/', '', $hashedCodeUser);
-                $hashedCodeUser2 = implode('', $tabpos);
+                $this->hashedCode = str_replace('/', '', $this->hashedCode);
+                $this->hashedCode2 = implode('', $tabpos);
                 unset($tabpos);
             }
             if (!empty($tabpt)) {
-                $hashedCodeUser = str_replace('.', '', $hashedCodeUser);
-                $hashedCodeUser2 .= implode('', $tabpt);
+                $this->hashedCode = str_replace('.', '', $this->hashedCode);
+                $this->hashedCode2 .= implode('', $tabpt);
                 unset($tabpt);
             }
         } else
-            $hashedCodeUser2 = strlen($hashedCodeUser) . 'd';
-        $this->codeUser = $codeUser;
-        $this->hashedCode = $hashedCodeUser;
-        $this->hashedCode2 = $hashedCodeUser2;
+            $this->hashedCode2 = strlen($this->hashedCode) . 'd';
     }
 
     public function getCodeUser(): ?string

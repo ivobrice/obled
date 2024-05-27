@@ -1,13 +1,31 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Edit Trajet{% endblock %}
+{% block title %}Edit Trajet
+{% endblock %}
 
 {% block body %}
-    <h1>Edit Trajet</h1>
+	<h1>Modifier votre trajet</h1>
 
-    {{ include('trajet/_form.html.twig', {'button_label': 'Update'}) }}
+	{# {{ include('trajet/_form.html.twig', {'button_label': 'Update'}) }} #}
 
-    <a href="{{ path('app_trajet_index') }}">back to list</a>
+	{# <form method="post" action="{{ path('app_trajet_new') }}">
+						<label for="email">Entrer votre email</label><input type="email" id="email" name="email" placeholder="Ex: ema@gmail.com"/>
+						<label for="codeTrajet">code du trajet</label><input type="text" id="codeTrajet" name="codeTrajet" placeholder="Ex: a4dd97eF"/>
+						<input type="hidden" name="_token" value="{{ csrf_token('delete' ~ trajet.id) }}">
+						<button class="btn">Envoyer</button>
+						</form> #}
 
-    {{ include('trajet/_delete_form.html.twig') }}
+	{{ form_start(form) }}
+	{{ form_row(form.email, {'attr': {'placeholder': 'Ex: kean@email.com'}}) }}
+	{{ form_row(form.codeUser) }}
+	{{ form_row(form._token) }}
+	<button class="btn" novalidate>Envoi</button>
+	{{ form_end(form, {render_rest: false}) }}
+
+	{# {{ form_row(form._token, {'attr': {'type': 'foo'}}) }}
+						{{ include('trajet/_form.html.twig', {'button_label': 'Update'}) }}
+					
+						<a href="{{ path('app_trajet_index') }}">back to list</a>
+					
+						{{ include('trajet/_delete_form.html.twig') }} #}
 {% endblock %}

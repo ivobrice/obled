@@ -47,7 +47,7 @@ class TrajetController extends AbstractController
     }
 
     #[Route('/new', name: 'app_trajet_new', methods: ['GET', 'POST'])]
-    public function new(Request $request, GetTrajet $getTrajet, EntityManagerInterface $em): Response
+    public function new(Request $request, EntityManagerInterface $em): Response
     {
         $addDataPost = [];
         $trajet = (!empty($trajet)) ? $trajet : new Trajet;
@@ -96,7 +96,7 @@ class TrajetController extends AbstractController
                 }
             }
         }
-        return $this->render($trajet ? 'trajet/new.html.twig' : 'trajet/edit.html.twig', ['trajet' => $trajet, 'form' => $form]);
+        return $this->render($trajet ? 'trajet/new.html.twig' : 'trajet/edit.html.twig', ['addDataPost' => $addDataPost, 'trajet' => $trajet, 'form' => $form]);
     }
 
     // #[Route('/{id}', name: 'app_trajet_delete', methods: ['POST'])]
@@ -115,17 +115,8 @@ class TrajetController extends AbstractController
     public function checkValidityOfValuesPost($request, $form, $trajet, $em)
     {
         $post = $request->request->all('trajet');
-        foreach ($post as $key => $value) {
-            if (is_string($value)) {
-                if ($pos = strpos($value, '\n', 0)) {
-                    if ($pos or $pos === 0) {
-                        $value = nl2br($value);
-                        // $value = str_replace('\n', '', $value);
-                        $post[$key] = $value;
-                    }
-                }
-            }
-        }
+        foreach ($post as $key => $value)
+            $post[$key] = is_string($value) ? nl2br($value) : $value;
         $request->request->set('trajet', $post);
         $dept = $this->formateVille($post['villeDept'], 'Dept', 'Entrer votre ville de départ et le pays départ (ex: Francfort, Allemagne)');
         $arrv = $this->formateVille($post['villeArrv'], 'Arrv', 'Entrer la ville d\'arrivée et le pays d\'arrivée (ex. Londres, Royaume-Uni)');
@@ -203,10 +194,11 @@ class TrajetController extends AbstractController
     public function formateDate($date, $method = null, $heure = null, $min = null)
     {
         if (empty($method)) {
-            $date = (preg_match('`^[0-9]{4}$`', $date)) ? new \DateTime($date) : $date;
-            if (is_object($date))
+            if (preg_match('`^([0-9]{4})$`', $date)) {
+                $date = $date . '-01 ' . '-01';
+                $date = new \DateTime($date);
                 return ['anneeNaiss' => $date, 'msgErrorNaiss' => null];
-            elseif (empty($date))
+            } elseif (empty($date))
                 return ['anneeNaiss' => null, 'msgErrorNaiss' => null];
             else
                 return ['anneeNaiss' => $date, 'msgErrorNaiss' => 'Donner l\'année. ex: 2000'];

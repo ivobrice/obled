@@ -1,0 +1,90 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Reservation{% endblock %}
+
+{% block body %}
+    <h1>Reservation</h1>
+
+    <table class="table">
+        <tbody>
+            <tr>
+                <th>Id</th>
+                <td>{{ reservation.id }}</td>
+            </tr>
+            <tr>
+                <th>PhonePassager</th>
+                <td>{{ reservation.phonePassager }}</td>
+            </tr>
+            <tr>
+                <th>NbrDePlaceRsrv</th>
+                <td>{{ reservation.nbrDePlaceRsrv }}</td>
+            </tr>
+            <tr>
+                <th>PrixPlaceRsrv</th>
+                <td>{{ reservation.prixPlaceRsrv }}</td>
+            </tr>
+            <tr>
+                <th>VilleDept</th>
+                <td>{{ reservation.villeDept }}</td>
+            </tr>
+            <tr>
+                <th>VilleArrv</th>
+                <td>{{ reservation.villeArrv }}</td>
+            </tr>
+            <tr>
+                <th>DateDept</th>
+                <td>{{ reservation.dateDept ? reservation.dateDept|date('Y-m-d H:i:s') : '' }}</td>
+            </tr>
+            <tr>
+                <th>MailPassager</th>
+                <td>{{ reservation.mailPassager }}</td>
+            </tr>
+            <tr>
+                <th>MailChauf</th>
+                <td>{{ reservation.mailChauf }}</td>
+            </tr>
+            <tr>
+                <th>PhoneChauf</th>
+                <td>{{ reservation.phoneChauf }}</td>
+            </tr>
+            <tr>
+                <th>DateValidationClient</th>
+                <td>{{ reservation.dateValidationClient ? reservation.dateValidationClient|date('Y-m-d H:i:s') : '' }}</td>
+            </tr>
+            <tr>
+                <th>Paiement</th>
+                <td>{{ reservation.paiement ? 'Yes' : 'No' }}</td>
+            </tr>
+            <tr>
+                <th>CreatedAt</th>
+                <td>{{ reservation.createdAt ? reservation.createdAt|date('Y-m-d H:i:s') : '' }}</td>
+            </tr>
+            <tr>
+                <th>UpdatedAt</th>
+                <td>{{ reservation.updatedAt ? reservation.updatedAt|date('Y-m-d H:i:s') : '' }}</td>
+            </tr>
+            <tr>
+                <th>Publish</th>
+                <td>{{ reservation.publish ? 'Yes' : 'No' }}</td>
+            </tr>
+            <tr>
+                <th>CodeUser</th>
+                <td>{{ reservation.codeUser }}</td>
+            </tr>
+            <tr>
+                <th>HashedCode</th>
+                <td>{{ reservation.hashedCode }}</td>
+            </tr>
+            <tr>
+                <th>HashedCode2</th>
+                <td>{{ reservation.hashedCode2 }}</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <a href="{{ path('app_reservation_index') }}">back to list</a>
+
+    <a href="{{ path('app_reservation_edit', {'id': reservation.id}) }}">edit</a>
+
+    {{ include('reservation/_delete_form.html.twig') }}
+{% endblock %}

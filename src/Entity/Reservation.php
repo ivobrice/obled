@@ -32,10 +32,11 @@ class Reservation
     #[ORM\Column(type: Types::SMALLINT, nullable: true)]
     private ?int $nbrDePlaceRsrv = null;
 
-    #[ORM\Column(type: Types::DECIMAL, precision: 9, scale: 2, nullable: true)]
-    private ?string $prixPlaceRsrv = null;
+    // #[ORM\Column(type: Types::DECIMAL, precision: 9, scale: 2, nullable: true)]
+    #[ORM\Column(nullable: true)]
+    private ?int $prixPlaceRsrv = null;
 
-   #[ORM\Column(length: 100, nullable: true)]
+    #[ORM\Column(length: 100, nullable: true)]
     private ?string $villeDept = null;
 
     #[ORM\Column(length: 100, nullable: true)]

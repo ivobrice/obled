@@ -1,0 +1,67 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Reservation index{% endblock %}
+
+{% block body %}
+    <h1>Reservation index</h1>
+
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Id</th>
+                <th>PhonePassager</th>
+                <th>NbrDePlaceRsrv</th>
+                <th>PrixPlaceRsrv</th>
+                <th>VilleDept</th>
+                <th>VilleArrv</th>
+                <th>DateDept</th>
+                <th>MailPassager</th>
+                <th>MailChauf</th>
+                <th>PhoneChauf</th>
+                <th>DateValidationClient</th>
+                <th>Paiement</th>
+                <th>CreatedAt</th>
+                <th>UpdatedAt</th>
+                <th>Publish</th>
+                <th>CodeUser</th>
+                <th>HashedCode</th>
+                <th>HashedCode2</th>
+                <th>actions</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for reservation in reservations %}
+            <tr>
+                <td>{{ reservation.id }}</td>
+                <td>{{ reservation.phonePassager }}</td>
+                <td>{{ reservation.nbrDePlaceRsrv }}</td>
+                <td>{{ reservation.prixPlaceRsrv }}</td>
+                <td>{{ reservation.villeDept }}</td>
+                <td>{{ reservation.villeArrv }}</td>
+                <td>{{ reservation.dateDept ? reservation.dateDept|date('Y-m-d H:i:s') : '' }}</td>
+                <td>{{ reservation.mailPassager }}</td>
+                <td>{{ reservation.mailChauf }}</td>
+                <td>{{ reservation.phoneChauf }}</td>
+                <td>{{ reservation.dateValidationClient ? reservation.dateValidationClient|date('Y-m-d H:i:s') : '' }}</td>
+                <td>{{ reservation.paiement ? 'Yes' : 'No' }}</td>
+                <td>{{ reservation.createdAt ? reservation.createdAt|date('Y-m-d H:i:s') : '' }}</td>
+                <td>{{ reservation.updatedAt ? reservation.updatedAt|date('Y-m-d H:i:s') : '' }}</td>
+                <td>{{ reservation.publish ? 'Yes' : 'No' }}</td>
+                <td>{{ reservation.codeUser }}</td>
+                <td>{{ reservation.hashedCode }}</td>
+                <td>{{ reservation.hashedCode2 }}</td>
+                <td>
+                    <a href="{{ path('app_reservation_show', {'id': reservation.id}) }}">show</a>
+                    <a href="{{ path('app_reservation_edit', {'id': reservation.id}) }}">edit</a>
+                </td>
+            </tr>
+        {% else %}
+            <tr>
+                <td colspan="19">no records found</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+
+    <a href="{{ path('app_reservation_new') }}">Create new</a>
+{% endblock %}

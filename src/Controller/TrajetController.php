@@ -4,6 +4,7 @@ namespace App\Controller;
 
 use App\Entity\Trajet;
 use App\Service\GetTrajet;
+use App\Entity\Reservation;
 use App\Service\BuildHashedCode;
 use App\Form\TrajetType;
 use App\Repository\TrajetRepository;
@@ -27,23 +28,23 @@ class TrajetController extends AbstractController
     #[Route('/{page}/{villeDept}/{villeArrv}/{id}/{hashedCode}', name: 'app_affiche_Entity')]
     public function afficheEntity($page, EntityManagerInterface $em, BuildHashedCode $buildCode, $villeDept, $villeArrv, $id, $hashedCode)
     {
-        $em = ($page == 'reservation') ? $em->getRepository(Reserver::class) : $em->getRepository(Itineraire::class);
-        if ($entity = $em->findOneBy(array('id' => $id, 'published' => true))) {
+        $em = ($page == 'reservation') ? $em->getRepository(Reservation::class) : $em->getRepository(trajet::class);
+        if ($entity = $em->findOneBy(['id' => $id, 'published' => true])) {
             $interval = $entity->getUpdatedAt()->diff(new \Datetime());
             if ($interval->format('%a') == 0 && $interval->format('%h') == 0 && $interval->format('%i') < 30) {
                 $hashedCodeOrigin = $buildCode->buildHashedCodeOrigin($hashedCode, $entity->getHashedCode2());
                 if (password_verify($entity->getCodeUser(), $hashedCodeOrigin)) {
-                    if ($page == 'reservation' && $entity instanceof Reserver)
-                        return $this->render('itineraire/reservation.html.twig', array('title' => 'Réservation de place : ' . $villeDept . ' - ' . $villeArrv . ' - MonColigo.fr', 'reservation' => $entity));
-                    elseif ($page == 'publication' && $entity instanceof Itineraire) {
-                        $title = ($entity->getCreatedAt() != $entity->getUpdatedAt()) ? 'Modification d\'une annonce' : 'Publication d\'une annonce';
+                    if ($page == 'reservation' && $entity instanceof Reservation)
+                        return $this->render('reservation/show.html.twig', ['title' => 'Réservation de place : ' . $villeDept . ' - ' . $villeArrv . ' - Obled.fr', 'reservation' => $entity]);
+                    elseif ($page == 'publication' && $entity instanceof trajet) {
+                        $title = ($entity->getCreatedAt() != $entity->getUpdatedAt()) ? 'Modification d\'un trajet' : 'Publication d\'un trajet';
                         dd($entity);
-                        return $this->render('itineraire/publication.html.twig', array('title' => $title, 'Itineraire' => $entity));
+                        return $this->render('trajet/publication.html.twig', ['title' => $title, 'trajet' => $entity]);
                     }
                 }
             }
         }
-        return $this->redirectToRoute('app_itineraire');
+        return $this->redirectToRoute('app_trajet');
     }
 
     #[Route('/new', name: 'app_trajet_new', methods: ['GET', 'POST'])]

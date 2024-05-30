@@ -122,7 +122,6 @@ class Trajet
     public function __construct()
     {
         $this->reservations = new ArrayCollection();
-        $this->publish = true;
     }
 
     public function getId(): ?int

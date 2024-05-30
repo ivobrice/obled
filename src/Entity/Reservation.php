@@ -118,9 +118,10 @@ class Reservation
         return $this->prixPlaceRsrv;
     }
 
-    public function setPrixPlaceRsrv(?string $prixPlaceRsrv): static
+    public function setPrixPlaceRsrv(?int $nbrDePlaceRsrv): static
     {
-        $this->prixPlaceRsrv = $prixPlaceRsrv;
+        $this->prixPlaceRsrv = $nbrDePlaceRsrv * $this->trajet->getPrixPlace();
+        $this->nbrDePlaceRsrv = $nbrDePlaceRsrv;
 
         return $this;
     }

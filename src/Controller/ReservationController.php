@@ -2,6 +2,7 @@
 
 namespace App\Controller;
 
+use App\Entity\Trajet;
 use App\Entity\Reservation;
 use App\Form\ReservationType;
 use App\Repository\ReservationRepository;
@@ -22,24 +23,55 @@ class ReservationController extends AbstractController
         ]);
     }
 
-    #[Route('/new', name: 'app_reservation_new', methods: ['GET', 'POST'])]
-    public function new(Request $request, EntityManagerInterface $entityManager): Response
+    #[Route('/trajet', name: 'app_reservation_trajet', methods: ['GET', 'POST'])]
+    public function new(Request $request, EntityManagerInterface $em): Response
     {
-        $reservation = new Reservation();
-        $form = $this->createForm(ReservationType::class, $reservation);
-        $form->handleRequest($request);
-
-        if ($form->isSubmitted() && $form->isValid()) {
-            $entityManager->persist($reservation);
-            $entityManager->flush();
-
-            return $this->redirectToRoute('app_reservation_index', [], Response::HTTP_SEE_OTHER);
+        if ($request->isMethod('POST')) {
+            $post = $request->request->all();
+            if (!empty($post['mailPassager']) && !empty($post['nbrDePlaceRsrv']) && !empty($post['idTrajet'])) {
+                if ($trajet = $em->getRepository(trajet::class)->find($post['idTrajet'])) {
+                    if ($this->checkTimeDept($trajet->getDateDept())) {
+                        $nbPlace = $trajet->getNbDePlace() - $post['nbrDePlaceRsrv'];
+                        if ($nbPlace >= 0) {
+                            $reservation = new Reservation();
+                            $reservation->setTrajet($trajet);
+                            $reservation->setPrixPlaceRsrv($post['nbDePlaceRsrv']);
+                            $reservation->setMailPassager($post['mailPassager']);
+                            if (!empty($post['phonePassager']))
+                                $reservation->setPhonePassager($post['phonePassager']);
+                            $reservation->setMailChauf($trajet->getEmail());
+                            $reservation->setPhoneChauf($trajet->getPhone());
+                            $reservation->setDateDept($trajet->getDateDept());
+                            $reservation->setVilleDept($trajet->getVilleDept());
+                            $reservation->setVilleArrv($trajet->getVilleArrv());
+                            if ($this->getUser())
+                                $reservation->setUser($this->getUser());
+                            $em->persist($reservation);
+                            if ($hashedCodeClient = $reservation->getHashedCode()) {
+                                $em->flush();
+                                return $this->redirectToRoute('app_afficheEntity', 
+                                ['page' => 'reservation', 'villeDept' => $trajet->getVilleDept(),
+                                 'villeArrv' => $trajet->getVilleArrv(), 'id' => $reservation->getId(), 
+                                 'hashedCode' => $hashedCodeClient],  Response::HTTP_SEE_OTHER);
+                            }
+                        } else {
+                            if ($trajet->getNbrDePlace() == 1)
+                                $place = 'qu\'une place disponible';
+                            elseif ($trajet->getNbrDePlace() > 1) 
+                                $place = 'que ' . $trajet->getNbrDePlace() . ' places disponibles';
+                            else
+                                $place = 'de place disponible';
+                            $this->addFlash('danger', 'Plus ' . $place . ' pour ce trajet !');
+                            return $this->redirectToRoute('app_trajet_show', ['id' => $post['idTrajet'], 'villeDept' => $trajet->getVilleDept(), 'villeArrv' => $trajet->getVilleArrv()]);
+                        }
+                    } else
+                        $this->addFlash('danger', 'Réservation impossible, la date de départ du voyage est dépassé.');
+                }
+            } else
+                $this->addFlash('danger', 'Vos informations sont incomplètes');
+            return $this->redirectToRoute('app_trajet');
         }
-
-        return $this->render('reservation/new.html.twig', [
-            'reservation' => $reservation,
-            'form' => $form,
-        ]);
+        return $this->redirectToRoute('app_trajet');
     }
 
     #[Route('/{id}', name: 'app_reservation_show', methods: ['GET'])]
@@ -77,5 +109,17 @@ class ReservationController extends AbstractController
         }
 
         return $this->redirectToRoute('app_reservation_index', [], Response::HTTP_SEE_OTHER);
+    }
+
+    public function checkTimeDept($dateDept)
+    {
+        $currentDate = new \Datetime();
+        $interval = $currentDate->diff($dateDept);
+        if ($interval->format('%R') == '+') {
+            if (($dateDept->format('Y-m-d') == $currentDate->format('Y-m-d')) && $interval->format('%h') == 0 && $interval->format('%i') < 12)
+                return FALSE;
+            return TRUE;
+        }
+        return FALSE;
     }
 }

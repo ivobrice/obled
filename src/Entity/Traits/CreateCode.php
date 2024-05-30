@@ -7,7 +7,7 @@ use Doctrine\ORM\Mapping as ORM;
 trait CreateCode
 {
     #[ORM\Column(nullable: true)]
-    private ?bool $publish = null;
+    private ?bool $publish = true;
 
     #[ORM\Column(length: 20, nullable: true)]
     private ?string $codeUser = null;
@@ -18,6 +18,7 @@ trait CreateCode
     #[ORM\Column(length: 45, nullable: true)]
     private ?string $hashedCode2 = null;
 
+    #[ORM\PrePersist]
     public function traitCreateCodeUser()
     {
         $this->codeUser = uniqid();

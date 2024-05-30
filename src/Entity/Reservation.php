@@ -32,10 +32,11 @@ class Reservation
     #[ORM\Column(type: Types::SMALLINT, nullable: true)]
     private ?int $nbrDePlaceRsrv = null;
 
-    #[ORM\Column(type: Types::DECIMAL, precision: 9, scale: 2, nullable: true)]
-    private ?string $prixPlaceRsrv = null;
+    // #[ORM\Column(type: Types::DECIMAL, precision: 9, scale: 2, nullable: true)]
+    #[ORM\Column(nullable: true)]
+    private ?int $prixPlaceRsrv = null;
 
-   #[ORM\Column(length: 100, nullable: true)]
+    #[ORM\Column(length: 100, nullable: true)]
     private ?string $villeDept = null;
 
     #[ORM\Column(length: 100, nullable: true)]
@@ -117,9 +118,10 @@ class Reservation
         return $this->prixPlaceRsrv;
     }
 
-    public function setPrixPlaceRsrv(?string $prixPlaceRsrv): static
+    public function setPrixPlaceRsrv(?int $nbrDePlaceRsrv): static
     {
-        $this->prixPlaceRsrv = $prixPlaceRsrv;
+        $this->prixPlaceRsrv = $nbrDePlaceRsrv * $this->trajet->getPrixPlace();
+        $this->nbrDePlaceRsrv = $nbrDePlaceRsrv;
 
         return $this;
     }

@@ -42,7 +42,6 @@ trait Timestampable
     {
         if ($this->getCreatedAt() === null) {
             $this->setCreatedAt(new \DateTimeImmutable());
-            $this->traitCreateCodeUser();
         }
         $this->setUpdatedAt(new \DateTimeImmutable());
     }

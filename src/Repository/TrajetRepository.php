@@ -21,6 +21,51 @@ class TrajetRepository extends ServiceEntityRepository
         parent::__construct($registry, Trajet::class);
     }
 
+    public function getTrajetWithUsers($villeDept, $villeArrv, $paysDept, $paysArrv, $dateDept)
+    {
+        $qb = $this->createQueryBuilder('t');
+        $qb->leftJoin('t.user', 'u')->addSelect('u');
+        if ($paysDept && $paysArrv) {
+            if ($paysDept == $paysArrv) {
+                $qb->Where('t.villeDept = :villeDept')
+                    ->setParameter('villeDept', $villeDept)
+                    ->andWhere('t.villeArrv = :villeArrv')
+                    ->setParameter('villeArrv', $villeArrv);
+            }
+            $qb->andwhere('t.paysDept = :paysDept')
+                ->setParameter('paysDept', $paysDept)
+                ->andWhere('t.paysArrv = :paysArrv')
+                ->setParameter('paysArrv', $paysArrv);
+        } else {
+            if ($paysDept) {
+                $qb->where('t.paysDept = :paysDept')
+                    ->setParameter('paysDept', $paysDept)
+                    ->andWhere('t.villeArrv = :villeArrv')
+                    ->setParameter('villeArrv', $villeArrv);
+            } elseif ($paysArrv) {
+                $qb->andWhere('t.paysArrv = :paysArrv')
+                    ->setParameter('paysArrv', $paysArrv);
+                if ($villeDept) {
+                    $qb->andWhere('t.villeDept = :villeDept')
+                        ->setParameter('villeDept', $villeDept);
+                }
+            } else {
+                $qb->andWhere('t.villeArrv = :villeArrv')
+                    ->setParameter('villeArrv', $villeArrv);
+                if ($villeDept) {
+                    $qb->andWhere('t.villeDept = :villeDept')
+                        ->setParameter('villeDept', $villeDept);
+                }
+            }
+        }
+        $qb->andwhere('t.publish = :publish')
+            ->setParameter('publish', true)
+            ->andWhere('t.dateDept >= :dateDept')
+            ->setParameter('dateDept', $dateDept)
+            ->orderBy('t.dateDept');
+        return $qb->getQuery()->getResult();
+    }
+
 //    /**
 //     * @return Trajet[] Returns an array of Trajet objects
 //     */

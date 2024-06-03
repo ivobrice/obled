@@ -18,36 +18,29 @@ use Symfony\Component\Routing\Attribute\Route;
 #[Route('/trajet')]
 class TrajetController extends AbstractController
 {
-    public function transformDateEntity($trajets, $changeDate, $villeDept = null, $villeArrv = null, $paysDept = null, $paysArrv = null)
+    public function dispatchEntity($trajets, $villeDept = null, $villeArrv = null, $paysDept = null, $paysArrv = null)
     {
-        if (is_array($trajets)) {
-            $trajets2 = []; $trajets3 = []; 
-            $trajets4 = []; $trajets5 = [];
-            foreach ($trajets as $trajet) {
-                // $dateDept = $changeDate->BuiltDateDept($trajet->getDateDept());
-                // $trajet->setDateDept($dateDept);
-                if (($trajet->getVilleDept() == $villeDept or empty($villeDept)) && ($trajet->getVilleArrv() == $villeArrv))
-                    $trajets2[] = $trajet;
-                elseif ($paysDept != $paysArrv) {
-                    if (($trajet->getVilleDept() == $villeDept) && ($trajet->getVilleArrv() != $villeArrv))
-                        $trajets3[] = $trajet;
-                    elseif (($trajet->getVilleDept() != $villeDept) && ($trajet->getVilleArrv() == $villeArrv))
-                        $trajets4[] = $trajet;
-                    elseif (($trajet->getVilleDept() != $villeDept) && ($trajet->getVilleArrv() != $villeArrv))
-                        $trajets5[] = $trajet;
-                }    
-            }
-            unset($trajets);
-            $trajets = ['villeDept_villeArrv' => $trajets2, 'villeDept_villeArrvDif' => $trajets3, 'villeDeptDif_villeArrv' => $trajets4, 'villeDeptDif_villeArrvDif' => $trajets5];
-        }elseif (is_object($trajets)) {
-            $dateDept = $changeDate->BuiltDateDept($trajets->getDateDept());
-            $trajets->setDateDept($dateDept);
+        $trajets2 = []; $trajets3 = []; $trajets4 = []; $trajets5 = [];
+        foreach ($trajets as $trajet) {
+            if (($trajet->getVilleDept() == $villeDept or empty($villeDept)) && ($trajet->getVilleArrv() == $villeArrv))
+                $trajets2[] = $trajet;
+            elseif ($paysDept != $paysArrv) {
+                if (($trajet->getVilleDept() == $villeDept) && ($trajet->getVilleArrv() != $villeArrv))
+                    $trajets3[] = $trajet;
+                elseif (($trajet->getVilleDept() != $villeDept) && ($trajet->getVilleArrv() == $villeArrv))
+                    $trajets4[] = $trajet;
+                elseif (($trajet->getVilleDept() != $villeDept) && ($trajet->getVilleArrv() != $villeArrv))
+                    $trajets5[] = $trajet;
+            }    
         }
-        return $trajets;    
+        unset($trajets);
+        $trajets = ['villeDept_villeArrv' => $trajets2, 'villeDept_villeArrvDif' => $trajets3, 'villeDeptDif_villeArrv' => $trajets4, 'villeDeptDif_villeArrvDif' => $trajets5];
+        $trajets = $trajets['villeDept_villeArrv'];
+        return $trajets;   
     }
 
     #[Route('/', name: 'app_trajet_index', methods: ['GET'])]
-    public function index(Request $request, DateDeptBuilt $changeDate, TrajetRepository $em): Response
+    public function index(Request $request, TrajetRepository $em): Response
     {
         if (!empty($request->query->get('villeArrv'))) {
             $dept = $this->formateVille($request->query->get('villeDept'), 'Dept');
@@ -55,14 +48,13 @@ class TrajetController extends AbstractController
             $dateDept = $this->formateDate($request->query->get('dateDept'), 'GET');
             $trajets = $em->getTrajetWithUsers($dept['villeDept'], $arrv['villeArrv'], $dept['paysDept'], $arrv['paysArrv'], $dateDept);
             if ($trajets)
-                $trajets = $this->transformDateEntity($trajets, $changeDate, $dept['villeDept'], $arrv['villeArrv'], $dept['paysDept'], $arrv['paysArrv']);
+                $trajets = $this->dispatchEntity($trajets, $dept['villeDept'], $arrv['villeArrv'], $dept['paysDept'], $arrv['paysArrv']);
             $sep = empty($dept['villeDept']) ? 'vers ' : ' - ';
             return $this->render('trajet/index.html.twig', ['title' => 'Trajet: ' . $dept['villeDept'] . $sep . $arrv['villeArrv'] . ' - Obled.fr', 'trajets' => $trajets]);
         }else {
             $trajets = $em->getTrajetWithUsers('', 'toulouse', '', 'france', '2020-01-22');
             if ($trajets)
-            $trajets = $this->transformDateEntity($trajets, $changeDate, '', 'Toulouse', '', 'France');
-            $trajets = $trajets['villeDept_villeArrv'];
+                $trajets = $this->dispatchEntity($trajets, '', 'Toulouse', '', 'France');
             return $this->render('trajet/index.html.twig', [
                 'trajets' => $trajets, 'title' => 'Obled.fr',
             ]);

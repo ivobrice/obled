@@ -4,17 +4,19 @@ namespace App\Service;
 
 class DateDeptBuilt
 {
-	/**
+    /**
      * @param \Datetime $dateDept
      * @return String
      */
-  	public function BuiltDateDept($dateDept)
-  	{
+    public function BuiltDateDept($dateDept)
+    {
         $currentDate = new \Datetime();
-    	$interval = $dateDept->diff($currentDate);
-        $sem = ['Mon.' => 'Lun.', 'Tue.' => 'Mar.', 'Wed.' => 'Mer.', 'Thu.' => 'Jeu.', 'Fri.' => 'Ven.', 'Sat.' => 'Sam.', 'Sun.' => 'Dim.', 
-        'Jan.' => 'Jan.', 'Feb.' => 'Fév.', 'Mar.' => 'Mar.', 'Apr.' => 'Avr.', 'May.' => 'Mai.', 'Jun.' => 'Juin.', 'Jul.' => 'Juil.', 'Aug.' => 'Août.', 
-        'Sep.' => 'Sep.', 'Oct.' => 'Oct.', 'Nov.' => 'Nov.', 'Dec.' => 'Déc.'];
+        $interval = $dateDept->diff($currentDate);
+        $sem = [
+            'Mon.' => 'Lun.', 'Tue.' => 'Mar.', 'Wed.' => 'Mer.', 'Thu.' => 'Jeu.', 'Fri.' => 'Ven.', 'Sat.' => 'Sam.', 'Sun.' => 'Dim.',
+            'Jan.' => 'Jan.', 'Feb.' => 'Fév.', 'Mar.' => 'Mar.', 'Apr.' => 'Avr.', 'May.' => 'Mai.', 'Jun.' => 'Juin.', 'Jul.' => 'Juil.',
+            'Aug.' => 'Août.', 'Sep.' => 'Sep.', 'Oct.' => 'Oct.', 'Nov.' => 'Nov.', 'Dec.' => 'Déc.'
+        ];
         if ($interval->format('%a') == 0 or $interval->format('%a') == 1) {
             if ($interval->format('%a') == 0) {
                 if ($currentDate->format('Y-m-d') == $dateDept->format('Y-m-d')) {
@@ -22,11 +24,11 @@ class DateDeptBuilt
                         $jourDeptTrajet = 'Aujourd\'hui ';
                     else
                         $jourDeptTrajet = '(Date dépassée) aujourd\'hui ';
-                }elseif ($interval->invert)
+                } elseif ($interval->invert)
                     $jourDeptTrajet = 'Demain ';
                 else
                     $jourDeptTrajet = '(Date dépassée) hier ';
-            }else {
+            } else {
                 $i = $j = 0;
                 $Aujourd = $currentDate->format('D.');
                 $jourDeptTrajet = $dateDept->format('D.');
@@ -34,7 +36,7 @@ class DateDeptBuilt
                     if ($day == $jourDeptTrajet) {
                         foreach ($sem as $days => $values) {
                             if ($days == $Aujourd) {
-                                if ($j + 1 == $i or ($j == 6 && $i == 0)) 
+                                if ($j + 1 == $i or ($j == 6 && $i == 0))
                                     $jourDeptTrajet = 'Demain ';
                                 elseif ($j - 1 == $i or ($j == 0 && $i == 6))
                                     $jourDeptTrajet = '(Date dépassée) hier ';
@@ -42,19 +44,19 @@ class DateDeptBuilt
                                     $jourDeptTrajet = $interval->invert ? '' : '(Date dépassée) ';
                                 break;
                             }
-                            $j ++;
+                            $j++;
                         }
                         break;
                     }
-                    $i ++;
+                    $i++;
                 }
             }
-            $dateDept = $jourDeptTrajet . $dateDept->format('D. d M. à H:i');
-        }else {
+            $dateDept = $jourDeptTrajet . $dateDept->format('D. d M. Y à H:i');
+        } else {
             if ($interval->invert)
-                $dateDept = $dateDept->format('D. d M. à H:i');
-            else 
-                $dateDept = '(Date dépassée) ' . $dateDept->format('D. d M. à H:i');
+                $dateDept = $dateDept->format('D. d M. Y à H:i');
+            else
+                $dateDept = '(Date dépassée) ' . $dateDept->format('D. d M. Y à H:i');
         }
         $local = 'fr';
         if ($local == 'fr') {
@@ -67,5 +69,5 @@ class DateDeptBuilt
             $dateDept = implode(' ', $dateDept);
         }
         return $dateDept;
-  	}
+    }
 }

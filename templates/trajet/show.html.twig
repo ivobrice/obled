@@ -1,114 +1,115 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Trajet{% endblock %}
+{% block title %}Trajet
+{% endblock %}
 
 {% block body %}
-    <h1>Trajet</h1>
+	<h1>Trajet</h1>
 
-    <table class="table">
-        <tbody>
-            <tr>
-                <th>Id</th>
-                <td>{{ trajet.id }}</td>
-            </tr>
-            <tr>
-                <th>VilleDept</th>
-                <td>{{ trajet.villeDept }}</td>
-            </tr>
-            <tr>
-                <th>VilleArrv</th>
-                <td>{{ trajet.villeArrv }}</td>
-            </tr>
-            <tr>
-                <th>PaysDept</th>
-                <td>{{ trajet.paysDept }}</td>
-            </tr>
-            <tr>
-                <th>PaysArrv</th>
-                <td>{{ trajet.paysArrv }}</td>
-            </tr>
-            <tr>
-                <th>DateDept</th>
-                <td>{{ trajet.dateDept ? trajet.dateDept|date('Y-m-d H:i:s') : '' }}</td>
-            </tr>
-            <tr>
-                <th>NbrDePlace</th>
-                <td>{{ trajet.nbrDePlace }}</td>
-            </tr>
-            <tr>
-                <th>PrixPlace</th>
-                <td>{{ trajet.prixPlace }}</td>
-            </tr>
-            <tr>
-                <th>RendezVsDept</th>
-                <td>{{ trajet.rendezVsDept }}</td>
-            </tr>
-            <tr>
-                <th>RendezVsArrv</th>
-                <td>{{ trajet.rendezVsArrv }}</td>
-            </tr>
-            <tr>
-                <th>Description</th>
-                <td>{{ trajet.description }}</td>
-            </tr>
-            <tr>
-                <th>Restrictions</th>
-                <td>{{ trajet.restrictions }}</td>
-            </tr>
-            <tr>
-                <th>MarqVoiture</th>
-                <td>{{ trajet.marqVoiture }}</td>
-            </tr>
-            <tr>
-                <th>NbrePlaceArr</th>
-                <td>{{ trajet.nbrePlaceArr }}</td>
-            </tr>
-            <tr>
-                <th>Prenom</th>
-                <td>{{ trajet.prenom }}</td>
-            </tr>
-            <tr>
-                <th>Email</th>
-                <td>{{ trajet.email }}</td>
-            </tr>
-            <tr>
-                <th>Phone</th>
-                <td>{{ trajet.phone }}</td>
-            </tr>
-            <tr>
-                <th>AnneeNaiss</th>
-                <td>{{ trajet.anneeNaiss ? trajet.anneeNaiss|date('Y-m-d') : '' }}</td>
-            </tr>
-            <tr>
-                <th>CreatedAt</th>
-                <td>{{ trajet.createdAt ? trajet.createdAt|date('Y-m-d H:i:s') : '' }}</td>
-            </tr>
-            <tr>
-                <th>UpdatedAt</th>
-                <td>{{ trajet.updatedAt ? trajet.updatedAt|date('Y-m-d H:i:s') : '' }}</td>
-            </tr>
-            <tr>
-                <th>Publish</th>
-                <td>{{ trajet.publish ? 'Yes' : 'No' }}</td>
-            </tr>
-            <tr>
-                <th>CodeUser</th>
-                <td>{{ trajet.codeUser }}</td>
-            </tr>
-            <tr>
-                <th>HashedCode</th>
-                <td>{{ trajet.hashedCode }}</td>
-            </tr>
-            <tr>
-                <th>HashedCode2</th>
-                <td>{{ trajet.hashedCode2 }}</td>
-            </tr>
-        </tbody>
-    </table>
+	<table class="table">
+		<tbody>
+			<tr>
+				<th>Id</th>
+				<td>{{ trajet.id }}</td>
+			</tr>
+			<tr>
+				<th>VilleDept</th>
+				<td>{{ trajet.villeDept }}</td>
+			</tr>
+			<tr>
+				<th>VilleArrv</th>
+				<td>{{ trajet.villeArrv }}</td>
+			</tr>
+			<tr>
+				<th>PaysDept</th>
+				<td>{{ trajet.paysDept }}</td>
+			</tr>
+			<tr>
+				<th>PaysArrv</th>
+				<td>{{ trajet.paysArrv }}</td>
+			</tr>
+			<tr>
+				<th>DateDept</th>
+				<td>{{ trajet.dateDept ? trajet.dateDept|dateTranf : '' }}</td>
+			</tr>
+			<tr>
+				<th>NbrDePlace</th>
+				<td>{{ trajet.nbrDePlace }}</td>
+			</tr>
+			<tr>
+				<th>PrixPlace</th>
+				<td>{{ trajet.prixPlace }}</td>
+			</tr>
+			<tr>
+				<th>RendezVsDept</th>
+				<td>{{ trajet.rendezVsDept }}</td>
+			</tr>
+			<tr>
+				<th>RendezVsArrv</th>
+				<td>{{ trajet.rendezVsArrv }}</td>
+			</tr>
+			<tr>
+				<th>Description</th>
+				<td>{{ trajet.description }}</td>
+			</tr>
+			<tr>
+				<th>Restrictions</th>
+				<td>{{ trajet.restrictions }}</td>
+			</tr>
+			<tr>
+				<th>MarqVoiture</th>
+				<td>{{ trajet.marqVoiture }}</td>
+			</tr>
+			<tr>
+				<th>NbrePlaceArr</th>
+				<td>{{ trajet.nbrePlaceArr }}</td>
+			</tr>
+			<tr>
+				<th>Prenom</th>
+				<td>{{ trajet.prenom }}</td>
+			</tr>
+			<tr>
+				<th>Email</th>
+				<td>{{ trajet.email }}</td>
+			</tr>
+			<tr>
+				<th>Phone</th>
+				<td>{{ trajet.phone }}</td>
+			</tr>
+			<tr>
+				<th>AnneeNaiss</th>
+				<td>{{ trajet.anneeNaiss ? trajet.anneeNaiss|date('Y-m-d') : '' }}</td>
+			</tr>
+			<tr>
+				<th>CreatedAt</th>
+				<td>{{ trajet.createdAt ? trajet.createdAt|date('Y-m-d H:i:s') : '' }}</td>
+			</tr>
+			<tr>
+				<th>UpdatedAt</th>
+				<td>{{ trajet.updatedAt ? trajet.updatedAt|date('Y-m-d H:i:s') : '' }}</td>
+			</tr>
+			<tr>
+				<th>Publish</th>
+				<td>{{ trajet.publish ? 'Yes' : 'No' }}</td>
+			</tr>
+			<tr>
+				<th>CodeUser</th>
+				<td>{{ trajet.codeUser }}</td>
+			</tr>
+			<tr>
+				<th>HashedCode</th>
+				<td>{{ trajet.hashedCode }}</td>
+			</tr>
+			<tr>
+				<th>HashedCode2</th>
+				<td>{{ trajet.hashedCode2 }}</td>
+			</tr>
+		</tbody>
+	</table>
 
-    <a href="{{ path('app_trajet_index') }}">back to list</a>
-
-    <a href="{{ path('app_trajet_edit', {'id': trajet.id}) }}">edit</a>
-
-    {{ include('trajet/_delete_form.html.twig') }}
+	{# <a href="{{ path('app_trajet_index') }}">back to list</a>
+		
+		    <a href="{{ path('app_trajet_edit', {'id': trajet.id}) }}">edit</a>
+		
+		    {{ include('trajet/_delete_form.html.twig') }} #}
 {% endblock %}

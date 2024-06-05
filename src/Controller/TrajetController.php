@@ -4,15 +4,17 @@ namespace App\Controller;
 
 use App\Entity\Trajet;
 use App\Service\GetTrajet;
-use App\Service\DateDeptBuilt;
 use App\Entity\Reservation;
 use App\Service\BuildHashedCode;
 use App\Form\TrajetType;
 use App\Repository\TrajetRepository;
 use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Bridge\Twig\Mime\TemplatedEmail;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Mailer\MailerInterface;
+use Symfony\Component\Mime\Address;
 use Symfony\Component\Routing\Attribute\Route;
 
 #[Route('/trajet')]
@@ -20,7 +22,10 @@ class TrajetController extends AbstractController
 {
     public function dispatchEntity($trajets, $villeDept = null, $villeArrv = null, $paysDept = null, $paysArrv = null)
     {
-        $trajets2 = []; $trajets3 = []; $trajets4 = []; $trajets5 = [];
+        $trajets2 = [];
+        $trajets3 = [];
+        $trajets4 = [];
+        $trajets5 = [];
         foreach ($trajets as $trajet) {
             if (($trajet->getVilleDept() == $villeDept or empty($villeDept)) && ($trajet->getVilleArrv() == $villeArrv))
                 $trajets2[] = $trajet;
@@ -31,12 +36,12 @@ class TrajetController extends AbstractController
                     $trajets4[] = $trajet;
                 elseif (($trajet->getVilleDept() != $villeDept) && ($trajet->getVilleArrv() != $villeArrv))
                     $trajets5[] = $trajet;
-            }    
+            }
         }
         unset($trajets);
         $trajets = ['villeDept_villeArrv' => $trajets2, 'villeDept_villeArrvDif' => $trajets3, 'villeDeptDif_villeArrv' => $trajets4, 'villeDeptDif_villeArrvDif' => $trajets5];
         $trajets = $trajets['villeDept_villeArrv'];
-        return $trajets;   
+        return $trajets;
     }
 
     #[Route('/', name: 'app_trajet_index', methods: ['GET'])]
@@ -51,7 +56,7 @@ class TrajetController extends AbstractController
                 $trajets = $this->dispatchEntity($trajets, $dept['villeDept'], $arrv['villeArrv'], $dept['paysDept'], $arrv['paysArrv']);
             $sep = empty($dept['villeDept']) ? 'vers ' : ' - ';
             return $this->render('trajet/index.html.twig', ['title' => 'Trajet: ' . $dept['villeDept'] . $sep . $arrv['villeArrv'] . ' - Obled.fr', 'trajets' => $trajets]);
-        }else {
+        } else {
             $trajets = $em->getTrajetWithUsers('', 'toulouse', '', 'france', '2020-01-22');
             if ($trajets)
                 $trajets = $this->dispatchEntity($trajets, '', 'Toulouse', '', 'France');
@@ -99,15 +104,16 @@ class TrajetController extends AbstractController
         return $this->render('trajet/new.html.twig', ['addDataPost' => $addDataPost, 'trajet' => $trajet, 'form' => $form]);
     }
 
-    // #[Route('/{id}', name: 'app_trajet_show', methods: ['GET'])]
-    // public function show(Trajet $trajet): Response
-    // {
-    //     return $this->render('trajet/show.html.twig', [
-    //         'trajet' => $trajet,
-    //     ]);
-    // }
+    #[Route('/{id<\d+>}', name: 'app_trajet_show', methods: ['GET'])]
+    public function show(Trajet $trajet): Response
+    {
+        return $this->render('trajet/show.html.twig', [
+            'trajet' => $trajet,
+        ]);
+    }
 
     #[Route('/edit', name: 'app_trajet_edit', methods: ['GET', 'POST'])]
+    #[Route('/supprimer-un-trajet', name: 'app_trajet_edit_delete', methods: ['GET'])]
     public function edit(Request $request, GetTrajet $getTrajet, EntityManagerInterface $em): Response
     {
         $addDataPost = [];
@@ -133,19 +139,54 @@ class TrajetController extends AbstractController
                 }
             }
         }
-        return $this->render($trajet ? 'trajet/new.html.twig' : 'trajet/edit.html.twig', ['addDataPost' => $addDataPost, 'trajet' => $trajet, 'form' => $form]);
+        $delete = ($request->getPathInfo() == '/trajet/supprimer-un-trajet') ? true : false;
+        return $this->render($trajet ? 'trajet/new.html.twig' : 'trajet/edit.html.twig', ['addDataPost' => $addDataPost, 'trajet' => $trajet, 'form' => $form, 'delete' => $delete]);
     }
 
-    // #[Route('/{id}', name: 'app_trajet_delete', methods: ['POST'])]
-    // public function delete(Request $request, Trajet $trajet, EntityManagerInterface $entityManager): Response
-    // {
-    //     if ($this->isCsrfTokenValid('delete' . $trajet->getId(), $request->request->get('_token'))) {
-    //         $entityManager->remove($trajet);
-    //         $entityManager->flush();
-    //     }
-
-    //     return $this->redirectToRoute('app_trajet_index', [], Response::HTTP_SEE_OTHER);
-    // }
+    #[Route('/delete', name: 'app_trajet_delete', methods: ['POST'])]
+    public function delete(Request $request, GetTrajet $getTrajet, EntityManagerInterface $em, MailerInterface $mailer): Response
+    {
+        if ($request->isMethod('POST')) {
+            $post = $request->request->all('trajet');
+            if (count(array_keys($post)) < 5 && isset($post['email']) && isset($post['codeUser'])) {
+                if ($trajet = $getTrajet->execute($post, $em)) {
+                    if (!is_object($trajet)) {
+                        $erroModif = $trajet;
+                        $trajet = null;
+                        return $this->redirectToRoute('app_trajet_edit_delete', [], Response::HTTP_SEE_OTHER);
+                    }
+                }
+            }
+            if ($this->isCsrfTokenValid('deleteOneTrajet', $request->request->get('_token'))) {
+                dd($trajet);
+                if ($reservations = $trajet->getReservations()) {
+                    foreach ($reservations as $reservation) {
+                        if ($reservation->isPaiement()) {
+                            //remboursement
+                            $fraisRsrv = $reservation->getPrixPlaceRsrv() * 0.15;
+                            // $this->addFlash('danger', 'Reservation annulé, informer le client '.$entity->getNumPhone().' en l\'envoyant ses frais de reservation: '.$fraisRsrv);
+                            $email = (new TemplatedEmail())
+                                ->from(new Address('admin@obled.com', 'Partner'))
+                                ->to('ivobrice@gmail.com')
+                                ->subject('Voyage annulé: Paiement passager!')
+                                ->htmlTemplate('trajet/emailPaiement.html.twig');
+                            $mailer->send($email);
+                        }
+                        $email = (new TemplatedEmail())
+                            ->from(new Address('admin@obled.com', 'Partner'))
+                            ->to($reservations->getMailPassager())
+                            ->subject('Voyage annulé!')
+                            ->htmlTemplate('trajet/email.html.twig');
+                        $mailer->send($email);
+                    }
+                }
+                $em->remove($trajet);
+                $em->flush();
+                // $this->addFlash('sup', 'Votre trajet à été supprimé avec succès');
+            }
+        }
+        return $this->redirectToRoute('app_trajet_index', [], Response::HTTP_SEE_OTHER);
+    }
 
 
 

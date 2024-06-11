@@ -6,6 +6,7 @@ use App\Entity\Trajet;
 use App\Entity\Reservation;
 use App\Form\ReservationType;
 use App\Repository\ReservationRepository;
+use App\Service\BuildHashedCode;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -15,12 +16,67 @@ use Symfony\Component\Routing\Attribute\Route;
 #[Route('/reservation')]
 class ReservationController extends AbstractController
 {
-    #[Route('/', name: 'app_reservation_index', methods: ['GET'])]
-    public function index(ReservationRepository $reservationRepository): Response
+    #[Route('/dashboard', name: 'app_reservation_index', methods: ['GET'])]
+    public function dashboard(Request $request, EntityManagerInterface $em, ReservationRepository $rm, BuildHashedCode $buildCode, $id = null, $hashedCode = null): Response
     {
-        return $this->render('reservation/index.html.twig', [
-            'reservations' => $reservationRepository->findAll(),
-        ]);
+        $user = 1;
+        if ($user) {       // Mettre derriere par-feu $user = $this->getUser() && role;
+            $currentDate = new \Datetime();
+            $indiceDv = 0;
+            $flush = false;
+            $indiceNews = 0;
+            $oldReservation = null;
+            if ($reservations = $rm->findWithTrajet('id')) {
+                $newReservations = [];
+                foreach ($reservations as $reservation) {
+                    $trajet = $reservation->getTrajet();
+                    $interval = $reservation->getCreatedAt()->diff($currentDate);
+                    $interval2 = $trajet->getDateDept()->diff($currentDate);
+                    if ($reservation->getCreatedAt()->format('Y-m-d') == $currentDate->format('Y-m-d') or (($interval->format('%a') <= 1 && ($reservation->getCreatedAt()->format('d') + 1) == $currentDate->format('d') /*&& $reservation->getCreatedAt()->format('H') > 13*/) && ($interval2->invert or $trajet->getDateDept()->format('Y-m-d') == $currentDate->format('Y-m-d')))) {
+                        if ($reservation->getCreatedAt()->format('Y-m-d') != $currentDate->format('Y-m-d'))
+                            $oldReservation++;
+                        else
+                            $indiceNews++;
+                        $newReservations[] = $reservation;
+                    } else {
+                        $em->remove($reservation);
+                        $flush = true;
+                    }
+                    unset($trajet, $interval, $interval2);
+                }
+                unset($reservations);
+            } else
+                $newReservations = null;
+            if ($reservationsDv = $rm->findWithTrajet('dateValidationClient', $currentDate->format('Y-m-d'), true))
+                $indiceDv = count($reservationsDv);
+
+            if ($currentDate->format('d') > 4) {
+                $dateRecupRsrvParti = ($request->getSession()->get('dateRecupRsrvParti')) ? $request->getSession()->get('dateRecupRsrvParti') : $currentDate;
+                $interval = $dateRecupRsrvParti->diff($currentDate);
+                if ($interval->format('%h') > 3 or $dateRecupRsrvParti->format('Y-m-d') != $currentDate->format('Y-m-d')) {
+                    $day = $currentDate->format('d') - 4;
+                    $day = ($day > 9) ? $day : '0' . $day;
+                    $dated = $currentDate->format('Y') . '-' . $currentDate->format('m') . '-' . $day;
+                    if ($reservationsDp = $rm->findWithTrajet(false, $dated)) {
+                        $flush = true;
+                        foreach ($reservationsDp as $reservationDv)
+                            $em->remove($reservationDv);
+                        unset($reservationsDp);
+                    }
+                    $request->getSession()->set('dateRecupRsrvParti', $currentDate);
+                } else
+                    $request->getSession()->set('dateRecupRsrvParti', $dateRecupRsrvParti);
+            }
+            if ($flush)
+                $em->flush();
+            unset($buildCode, $em, $rm, $currentDate);
+            return $this->render('reservation/dashboard.html.twig', [
+                /*'reservations' => $rm->findAll(),*/
+                'title' => 'Réservations du jour', 'reservationsDv' => $reservationsDv,
+                'newReservations' => $newReservations, 'nbReservation' => $indiceNews, 'nbReservationDv' => $indiceDv,
+                'oldReservation' => $oldReservation
+            ]);
+        }
     }
 
     #[Route('/trajet', name: 'app_reservation_trajet', methods: ['GET', 'POST'])]
@@ -48,16 +104,22 @@ class ReservationController extends AbstractController
                                 $reservation->setUser($this->getUser());
                             $em->persist($reservation);
                             if ($hashedCodeClient = $reservation->getHashedCode()) {
+                                dd($reservation);
                                 $em->flush();
-                                return $this->redirectToRoute('app_afficheEntity', 
-                                ['page' => 'reservation', 'villeDept' => $trajet->getVilleDept(),
-                                 'villeArrv' => $trajet->getVilleArrv(), 'id' => $reservation->getId(), 
-                                 'hashedCode' => $hashedCodeClient],  Response::HTTP_SEE_OTHER);
+                                return $this->redirectToRoute(
+                                    'app_afficheEntity',
+                                    [
+                                        'page' => 'reservation', 'villeDept' => $trajet->getVilleDept(),
+                                        'villeArrv' => $trajet->getVilleArrv(), 'id' => $reservation->getId(),
+                                        'hashedCode' => $hashedCodeClient
+                                    ],
+                                    Response::HTTP_SEE_OTHER
+                                );
                             }
                         } else {
                             if ($trajet->getNbrDePlace() == 1)
                                 $place = 'qu\'une place disponible';
-                            elseif ($trajet->getNbrDePlace() > 1) 
+                            elseif ($trajet->getNbrDePlace() > 1)
                                 $place = 'que ' . $trajet->getNbrDePlace() . ' places disponibles';
                             else
                                 $place = 'de place disponible';
@@ -103,7 +165,7 @@ class ReservationController extends AbstractController
     #[Route('/{id}', name: 'app_reservation_delete', methods: ['POST'])]
     public function delete(Request $request, Reservation $reservation, EntityManagerInterface $entityManager): Response
     {
-        if ($this->isCsrfTokenValid('delete'.$reservation->getId(), $request->getPayload()->get('_token'))) {
+        if ($this->isCsrfTokenValid('delete' . $reservation->getId(), $request->getPayload()->get('_token'))) {
             $entityManager->remove($reservation);
             $entityManager->flush();
         }

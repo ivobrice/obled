@@ -8,25 +8,28 @@ use App\Form\ReservationType;
 use App\Repository\ReservationRepository;
 use App\Service\BuildHashedCode;
 use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Bridge\Twig\Mime\TemplatedEmail;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Mailer\MailerInterface;
+use Symfony\Component\Mime\Address;
 use Symfony\Component\Routing\Attribute\Route;
 
 #[Route('/reservation')]
 class ReservationController extends AbstractController
 {
     #[Route('/dashboard', name: 'app_reservation_index', methods: ['GET'])]
-    public function dashboard(Request $request, EntityManagerInterface $em, ReservationRepository $rm, BuildHashedCode $buildCode, $id = null, $hashedCode = null): Response
+    public function dashboard(Request $request, EntityManagerInterface $em, ReservationRepository $rm): Response
     {
         $user = 1;
-        if ($user) {       // Mettre derriere par-feu $user = $this->getUser() && role;
-            $currentDate = new \Datetime();
+        if ($user) {      // Mettre derriere par-feu le tabl de bord $user = $this->getUser() && role;
             $indiceDv = 0;
             $flush = false;
             $indiceNews = 0;
             $oldReservation = null;
-            if ($reservations = $rm->findWithTrajet('id')) {
+            $currentDate = new \Datetime();
+            if ($reservations = $rm->findWithTrajet('id')) {  //recup les reservations d'aujourd8 et d'hier nn validés 
                 $newReservations = [];
                 foreach ($reservations as $reservation) {
                     $trajet = $reservation->getTrajet();
@@ -47,10 +50,10 @@ class ReservationController extends AbstractController
                 unset($reservations);
             } else
                 $newReservations = null;
-            if ($reservationsDv = $rm->findWithTrajet('dateValidationClient', $currentDate->format('Y-m-d'), true))
+            if ($reservationsDv = $rm->findWithTrajet('dateValidationClient', $currentDate->format('Y-m-d'), true))  //recup les reservations validés
                 $indiceDv = count($reservationsDv);
 
-            if ($currentDate->format('d') > 4) {
+            if ($currentDate->format('d') > 4) {   //sup les reservations des trajets partis
                 $dateRecupRsrvParti = ($request->getSession()->get('dateRecupRsrvParti')) ? $request->getSession()->get('dateRecupRsrvParti') : $currentDate;
                 $interval = $dateRecupRsrvParti->diff($currentDate);
                 if ($interval->format('%h') > 3 or $dateRecupRsrvParti->format('Y-m-d') != $currentDate->format('Y-m-d')) {
@@ -69,13 +72,71 @@ class ReservationController extends AbstractController
             }
             if ($flush)
                 $em->flush();
-            unset($buildCode, $em, $rm, $currentDate);
+            unset($em, $rm, $currentDate, $interval);
             return $this->render('reservation/dashboard.html.twig', [
-                /*'reservations' => $rm->findAll(),*/
                 'title' => 'Réservations du jour', 'reservationsDv' => $reservationsDv,
                 'newReservations' => $newReservations, 'nbReservation' => $indiceNews, 'nbReservationDv' => $indiceDv,
                 'oldReservation' => $oldReservation
             ]);
+        }
+    }
+
+    #[Route('/validation/{id}/{hashedCode}', name: 'app_reservation_validation', methods: ['GET'])]
+    public function validation($id = null, $hashedCode = null, BuildHashedCode $buildCode, EntityManagerInterface $em, ReservationRepository $rm, MailerInterface $mailer): Response
+    {
+        $user = 1;
+        if ($user) {    // Mettre derriere par-feu $user = $this->getUser() && role;
+            if ($id && $hashedCode) {
+                if ($reservation = $rm->findOneBy(['id' => $id, 'publish' => true])) {
+                    $hashedCodeOrigin = $buildCode->buildHashedCodeOrigin($hashedCode, $reservation->getHashedCode2());
+                    if (password_verify($reservation->getCodeUser(), $hashedCodeOrigin)) {
+                        $trajet = $reservation->getTrajet();
+                        if ($this->checkTimeDept($trajet->getDateDept())) {
+                            $nbPlace = $trajet->getNbrDePlace() - $reservation->getNbrDePlaceRsrv();
+                            if ($nbPlace >= 0) {
+                                $reservation->setPublish(false);
+                                $reservation->setDateValidationClient(new \DateTimeImmutable());
+                                $trajet->setNbrDePlace($nbPlace);
+                                $em->flush();
+                                $this->addFlash('success', 'Réservation payée avec succès. Informer le client en l\'envoyant les informations qui suivent: ' . $reservation()->getPhoneChauf() ? $reservation()->getPhoneChauf() : $trajet()->getUser()->getPhone() . ' : Code de reservation ' . $reservation->getCodeUser() . ' (à présenter au départ)');
+                                //envoyer mail au condcuteur + passager
+                                $emailPassager = (new TemplatedEmail())
+                                    ->from(new Address('admin@obled.com', 'Partner'))
+                                    ->to($reservation->getMailPassager())
+                                    ->subject('Réservation passager!')
+                                    ->htmlTemplate('trajet/emailPaiement.html.twig');
+                                $mailer->send($emailPassager);
+
+                                $emailChauf = (new TemplatedEmail())
+                                    ->from(new Address('admin@obled.com', 'Partner'))
+                                    ->to($reservation->getMailChauf())
+                                    ->subject('Réservation passager!')
+                                    ->htmlTemplate('trajet/reservationPassager.html.twig');
+                                $mailer->send($emailChauf);
+                            } else {
+                                if ($reservation->getNbrDePlaceRsrv() == 1)
+                                    $place = 'place';
+                                else
+                                    $place = 'places';
+                                if ($trajet->getNbrDePlace() == 1)
+                                    $phrase = 'qu\'une place disponible';
+                                elseif ($trajet->getNbrDePlace() > 1)
+                                    $phrase = 'que ' . $trajet->getNbrDePlace() . ' places disponibles';
+                                else
+                                    $phrase = 'de place disponible';
+                                $this->addFlash('notice', 'Paiement refusée. Le client a reservé ' . $reservation->getNbrDePlaceRsrv() . ' ' . $place . ' Mais il ne reste plus ' . $phrase . ' pour ce trajet !<br>
+                                    Veuillez informer le client ' . $reservation->getPhonePassager() . ' en lui renvoyant son transfert !');
+                                $em->remove($reservation);
+                            }
+                        } else {
+                            $this->addFlash('notice', 'Réservation refusée, car le conducteur est déja parti (heure de départ dépassée, le paiement est arrivée trop tard) veuillez informer le client ' . $reservation->getPhonePassager() . ' en lui renvoyant son transfert!');
+                            $em->remove($reservation);
+                        }
+                    } else
+                        $this->addFlash('notice', 'La Réservation n\'existe pas !');
+                }
+                return $this->redirectToRoute('app_reservation_index');
+            }
         }
     }
 
@@ -87,11 +148,11 @@ class ReservationController extends AbstractController
             if (!empty($post['mailPassager']) && !empty($post['nbrDePlaceRsrv']) && !empty($post['idTrajet'])) {
                 if ($trajet = $em->getRepository(trajet::class)->find($post['idTrajet'])) {
                     if ($this->checkTimeDept($trajet->getDateDept())) {
-                        $nbPlace = $trajet->getNbDePlace() - $post['nbrDePlaceRsrv'];
+                        $nbPlace = $trajet->getNbrDePlace() - $post['nbrDePlaceRsrv'];
                         if ($nbPlace >= 0) {
                             $reservation = new Reservation();
                             $reservation->setTrajet($trajet);
-                            $reservation->setPrixPlaceRsrv($post['nbDePlaceRsrv']);
+                            $reservation->setPrixPlaceRsrv($post['nbrDePlaceRsrv']);
                             $reservation->setMailPassager($post['mailPassager']);
                             if (!empty($post['phonePassager']))
                                 $reservation->setPhonePassager($post['phonePassager']);
@@ -141,24 +202,6 @@ class ReservationController extends AbstractController
     {
         return $this->render('reservation/show.html.twig', [
             'reservation' => $reservation,
-        ]);
-    }
-
-    #[Route('/{id}/edit', name: 'app_reservation_edit', methods: ['GET', 'POST'])]
-    public function edit(Request $request, Reservation $reservation, EntityManagerInterface $entityManager): Response
-    {
-        $form = $this->createForm(ReservationType::class, $reservation);
-        $form->handleRequest($request);
-
-        if ($form->isSubmitted() && $form->isValid()) {
-            $entityManager->flush();
-
-            return $this->redirectToRoute('app_reservation_index', [], Response::HTTP_SEE_OTHER);
-        }
-
-        return $this->render('reservation/edit.html.twig', [
-            'reservation' => $reservation,
-            'form' => $form,
         ]);
     }
 

@@ -167,16 +167,16 @@ class TrajetController extends AbstractController
                             // $this->addFlash('danger', 'Reservation annulé, informer le client '.$entity->getNumPhone().' en l\'envoyant ses frais de reservation: '.$fraisRsrv);
                             $email = (new TemplatedEmail())
                                 ->from(new Address('admin@obled.com', 'Partner'))
-                                ->to('ivobrice@gmail.com')
+                                ->to($reservation->getMailPassager())
                                 ->subject('Voyage annulé: Paiement passager!')
-                                ->htmlTemplate('trajet/emailPaiement.html.twig');
+                                ->htmlTemplate('trajet/emailSupTrajetPassager.html.twig');
                             $mailer->send($email);
                         }
                         $email = (new TemplatedEmail())
                             ->from(new Address('admin@obled.com', 'Partner'))
-                            ->to($reservations->getMailPassager())
+                            ->to($trajet->getMail())
                             ->subject('Voyage annulé!')
-                            ->htmlTemplate('trajet/email.html.twig');
+                            ->htmlTemplate('trajet/emailSupTrajetChauf.html.twig');
                         $mailer->send($email);
                     }
                 }
@@ -187,8 +187,6 @@ class TrajetController extends AbstractController
         }
         return $this->redirectToRoute('app_trajet_index', [], Response::HTTP_SEE_OTHER);
     }
-
-
 
     public function checkValidityOfValuesPost($request, $form, $trajet, $em)
     {

@@ -1,0 +1,161 @@
+{# {% extends 'layouts/base.html.twig' %} #}
+{% extends 'base.html.twig' %}
+{% block body %}
+	<h3>Réservations</h3>
+	{% if app.request.hasPreviousSession %}
+		{% for type, messages in app.session.flashbag.all() %}
+			{% for message in messages %}
+				<div class="flash-{{ type }}">
+					{{ message }}
+				</div>
+			{% endfor %}
+		{% endfor %}
+	{% endif %}
+	{% if msgValidation is defined %}
+		{{ msgValidation }}
+	{% endif %}
+	<div id="bloc-principal-Reservations">
+		<div id="bloc-separation"></div>
+		<div id="bloc-second-Reservations">
+			<div id="bloc-tertiaire-Reservations">
+				<div id="bloc-quatnaire-Reservations">
+					{% if reservationsDv is empty and newReservations is empty %}
+						<h4>Pas de réservations pour le moment</h4>
+					{% else %}
+						{% if newReservations is not empty %}
+							<div id="bloc-newReservation">
+								{% if nbReservation is not empty and oldReservation is empty %}
+									{% if nbReservation > 1 %}
+										<h6>{{ nbReservation }}
+											nouvelles réservations</h6>
+									{% elseif nbReservation == 1 %}
+										<h6>{{ nbReservation }}
+											nouvelle réservation</h6>
+									{% endif %}
+								{% elseif nbReservation is not empty and oldReservation is not empty %}
+									{% if nbReservation > 1 %}
+										<h6>{{ nbReservation }}
+											réservations</h6>
+									{% elseif nbReservation == 1 %}
+										<h6>{{ nbReservation }}
+											réservation</h6>
+									{% endif %}
+								{% elseif oldReservation is not empty %}
+									{% if oldReservation > 1 %}
+										<h6>{{ oldReservation }}
+											anciennes réservations</h6>
+									{% elseif oldReservation == 1 %}
+										<h6>{{ oldReservation }}
+											ancienne réservation</h6>
+									{% endif %}
+								{% endif %}
+								{% for newReservation in newReservations %}
+									<!--<span>{{ loop.index }}</span>-->
+									<div class="contenuAnnonce columns is-centered">
+										<div class="column">
+											<div class="box">
+												<table class="table is-12-tablet is-3-desktop">
+													<thead>
+														<tr>
+															<th>client</th>
+															<th>prix à payer</th>
+															<th>
+																{% if newReservation.nbrDePlaceRsrv > 1 %}places réservées{% else %}place réservée
+																{% endif %}
+															</th>
+															<th style="text-align: center;">voyage</th>
+															<th>date de reservation</th>
+															<!--<th>Téléphone du Conducteur</th>
+																																																																																																									                                                       <th>Code</th>-->
+															<th style="color:#F03A5F; text-align: center;">non payé</th>
+														</tr>
+													</thead>
+													<tbody>
+														<tr>
+															<td>{{ newReservation.phonePassager }}</td>
+															<td>{{ newReservation.prixPlaceRsrv }}</td>
+															<td>{{ newReservation.nbrDePlaceRsrv }}</td>
+															<td>{{ newReservation.trajet.villeDept }}
+																/
+																{{ newReservation.trajet.villeArrv }}</td>
+															<td>{{ newReservation.createdAt|date("d/m/Y") }}</td>
+															<!--<td>01 02 03 04 05</td>
+																																																																																																									                                                        <td>{{ newReservation.codeUser }}</td>-->
+															<td>
+																<a class="btn btn-success" href="{{ path('validation', { 'id': newReservation.id, 'hashedCode': newReservation.hashedCode }) }}">payer</a>
+															</td>
+														</tr>
+													</tbody>
+												</table>
+											</div>
+										</div>
+									</div>
+								{% endfor %}
+							</div>
+						{% endif %}
+
+						{% if reservationsDv is not empty %}
+							<div id="block-reservation">
+								{% if nbReservationDv > 1 %}
+									<h6>{{ nbReservationDv }}
+										réservations payées</h6>
+								{% endif %}
+								{% if nbReservationDv == 1 %}
+									<h6>{{ nbReservationDv }}
+										réservation payée</h6>
+								{% endif %}
+								{% for reservationDv in reservationsDv %}
+									<div class="contenuAnnonce columns is-centered">
+										<table class="table table2">
+											<thead>
+												<tr>
+													<th>client</th>
+													<th>prix payé</th>
+													<th>
+														{% if reservationDv.nbrDePlaceRsrv > 1 %}
+															places réservées
+														{% else %}
+															place réservée
+														{% endif %}
+													</th>
+													<th style="text-align: center;">voyage</th>
+													<th>conducteur</th>
+													<th style="text-align: center;">code</th>
+													<th style="color: #3EC46D; text-align: center;">payée</th>
+												</tr>
+											</thead>
+											<tbody>
+												<tr>
+													<td>{{ reservationDv.phonePassager }}</td>
+													<td>{{ reservationDv.prixPlaceRsrv }}</td>
+													<td>{{ reservationDv.nbrDePlaceRsrv }}</td>
+													<td>{{ reservationDv.trajet.villeDept }}
+														/
+														{{ reservationDv.trajet.villeArrv }}</td>
+													{% if app.user %}
+														{% set numPhone = reservationDv.trajet.user.phone %}
+													{% else %}
+														{% set numPhone = reservationDv.trajet.phone %}
+													{% endif %}
+													<td>{{ numPhone }}</td>
+													<td>{{ reservationDv.codeUser }}</td>
+													<td>
+														<a href="#" onclick="event.preventDefault(); confirm('Souhaitez vous annuler la reservation ?') && document.getElementById('js-rsrv-delete-form').submit();" class="btn btn-danger">annuler</a>
+														<form id="js-rsrv-delete-form" action="{{ path('supprimer', {'entity': 'reservation', 'id': reservationDv.id}) }}" method="post">
+															<input type="hidden" name="csrf_token" value="{{ csrf_token('delete_' ~ reservationDv.id) }}">
+															<input type="hidden" name="_method" value="DELETE">
+														</form>
+													</td>
+												</tr>
+											</tbody>
+										</table>
+									</div>
+								{% endfor %}
+							</div>
+						{% endif %}
+					{% endif %}
+				</div>
+			</div>
+		</div>
+	</div>
+{% endblock %}

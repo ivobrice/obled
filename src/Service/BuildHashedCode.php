@@ -28,7 +28,7 @@ class BuildHashedCode
             }
             if (!$okp) {
                 $lenTabcfs = count($tabcfs) - 1;
-                $tabcfp = array();
+                $tabcfp = [];
                 unset($tabcfs[$lenTabcfs]);
             }
             $lenHashedCode = strlen($hashedCode) + count($tabcfs) + count($tabcfp) - 1;

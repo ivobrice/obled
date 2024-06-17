@@ -21,6 +21,23 @@ class ReservationRepository extends ServiceEntityRepository
         parent::__construct($registry, Reservation::class);
     }
 
+    public function findWithTrajet($property = null, $currentDate = null, $today = null)
+    {
+        $qb = $this->createQueryBuilder('r');
+        $qb->innerJoin('r.trajet', 'a')->addSelect('a');
+        if ($currentDate) {
+            if ($today)
+                $qb->where('r.dateValidationClient >= :currentDate');
+            else
+                $qb->where('a.dateDept < :currentDate');
+            $qb->setParameter('currentDate', $currentDate);
+        } else
+            $qb->where('r.publish = :publish')->setParameter('publish', true);
+        if ($property)
+            $qb->orderBy("r.$property", 'desc');
+        return $qb->getQuery()->getResult();
+    }
+
     //    /**
     //     * @return Reservation[] Returns an array of Reservation objects
     //     */

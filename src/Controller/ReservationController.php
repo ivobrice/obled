@@ -4,7 +4,6 @@ namespace App\Controller;
 
 use App\Entity\Trajet;
 use App\Entity\Reservation;
-use App\Form\ReservationType;
 use App\Repository\ReservationRepository;
 use App\Service\BuildHashedCode;
 use Doctrine\ORM\EntityManagerInterface;

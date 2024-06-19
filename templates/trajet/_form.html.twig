@@ -19,12 +19,9 @@
 {{ form_row(form.marqVoiture) }}
 {% if app.user and trajet.id is empty %}
 	{{ form_row(form.email, {'attr': {'value': app.user.email}}) }}
-{% else %}
-	{{ form_row(form.email, {'attr': {'placeholder': 'Ex: kean@email.com (Obligatoire)'}}) }}
-{% endif %}
-{% if app.user and trajet.id is empty %}
 	{{ form_row(form.phone, {'attr': {'value': app.user.phone}}) }}
 {% else %}
+	{{ form_row(form.email, {'attr': {'placeholder': 'Ex: kean@email.com (Obligatoire)'}}) }}
 	{{ form_row(form.phone) }}
 {% endif %}
 {% if app.user is empty or trajet.id %}
@@ -34,6 +31,12 @@
 	{{ form_row(form.anneeNaiss, {'attr': {'value': trajet.anneeNaiss|date("Y")}}) }}
 {% else %}
 	{{ form_row(form.anneeNaiss) }}
+{% endif %}
+{% if app.user and app.user.imageName and trajet.id is empty %}
+	photo
+	{# <img src="{{ vich_uploader_asset(app.user)|imagine_filter('my_thumb_small') }}" alt="{{ app.user.email }}" class="w-100 img-fluid"/> #}
+{% else %}
+	{{ form_row(form.imageFile) }}
 {% endif %}
 {% if trajet.id %}
 	{{ form_row(form.id, {'attr': {'value': trajet.id}}) }}

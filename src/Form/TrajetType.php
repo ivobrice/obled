@@ -8,6 +8,8 @@ use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Form\Extension\Core\Type\HiddenType;
+use Symfony\Component\Validator\Constraints\Image;
+use Vich\UploaderBundle\Form\Type\VichImageType;
 
 class TrajetType extends AbstractType
 {
@@ -105,7 +107,18 @@ class TrajetType extends AbstractType
                 'required' => false
             ])
             ->add('id', HiddenType::class, ['mapped' => false])
-            ->add('hashedCode', HiddenType::class, ['mapped' => false]);
+            ->add('hashedCode', HiddenType::class, ['mapped' => false])
+            ->add('imageFile', VichImageType::class, [
+                'label' => 'Photo',
+                'required' => false,
+                'allow_delete' => false,
+                // 'delete_label' => 'supprimer la photo',
+                'download_uri' => false,
+                'imagine_pattern' => 'my_thumb_medium',
+                'constraints' => [
+                    new Image(['maxSize' => '15M', 'maxSizeMessage' => 'Image volumineuse, maximum 15M']),
+                ]
+            ]);
     }
 
     public function configureOptions(OptionsResolver $resolver): void

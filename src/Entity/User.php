@@ -8,6 +8,7 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Validator\Constraints as Assert;
@@ -19,6 +20,7 @@ use Vich\UploaderBundle\Mapping\Annotation as Vich;
 #[ORM\HasLifecycleCallbacks]
 #[Vich\Uploadable]
 #[ORM\UniqueConstraint(name: 'UNIQ_IDENTIFIER_EMAIL', fields: ['email'])]
+#[UniqueEntity(fields: ['email'], message: 'Cette adresse email est déja prise')]
 class User implements UserInterface, PasswordAuthenticatedUserInterface
 {
     use Timestampable;
@@ -28,10 +30,11 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column]
     private ?int $id = null;
 
-    #[ORM\Column(length: 180)]
+    #[ORM\Column(length: 100)]
     #[Assert\NotBlank(message: 'Entrer votre adresse email')]
+    #[Assert\Length(max: 100, maxMessage: 'Maximum {{ limit }} caractères')]
     #[Assert\Email(
-        message: 'L\'email {{ value }} n\'est pas une adresse email valide.',
+        message: '{{ value }} n\'est pas une adresse email valide.',
     )]
     private ?string $email = null;
 
@@ -45,16 +48,17 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
      * @var string The hashed password
      */
     #[ORM\Column]
-    #[Assert\NotBlank(message: 'Entrer votre mot de passe')]
     private ?string $password = null;
 
     #[ORM\Column(length: 100, nullable: true)]
+    #[Assert\Length(max: 100, maxMessage: 'Maximum {{ limit }} caractères')]
     private ?string $prenom = null;
 
     #[ORM\Column(type: Types::DATE_MUTABLE, nullable: true)]
     private ?\DateTimeInterface $anneeNaiss = null;
 
     #[ORM\Column(length: 30, nullable: true)]
+    #[Assert\Length(max: 30, maxMessage: 'Maximum {{ limit }} caractères')]
     private ?string $phone = null;
 
     #[ORM\OneToMany(targetEntity: Trajet::class, mappedBy: 'user')]
@@ -69,6 +73,9 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $imageName = null;
+
+    #[ORM\Column]
+    private bool $isVerified = false;
 
     public function __construct()
     {
@@ -271,6 +278,18 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function setImageName(?string $imageName): static
     {
         $this->imageName = $imageName;
+
+        return $this;
+    }
+
+    public function isVerified(): bool
+    {
+        return $this->isVerified;
+    }
+
+    public function setVerified(bool $isVerified): static
+    {
+        $this->isVerified = $isVerified;
 
         return $this;
     }

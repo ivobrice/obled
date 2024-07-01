@@ -44,7 +44,7 @@ class LoginFormCustomAuthenticator extends AbstractLoginFormAuthenticator
 
     public function onAuthenticationSuccess(Request $request, TokenInterface $token, string $firewallName): ?Response
     {
-        // $this->addFlash('success', 'Bienvenue' . $token->getuser()->getEmail());
+        $request->getSession()->getFlashBag()->add('success', 'Bienvenue' . $token->getuser()->getEmail());
         if ($targetPath = $this->getTargetPath($request->getSession(), $firewallName)) {
             return new RedirectResponse($targetPath);
         }

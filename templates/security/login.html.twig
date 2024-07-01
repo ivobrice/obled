@@ -1,6 +1,6 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Log in!{% endblock %}
+{% block title %}Connexion!{% endblock %}
 
 {% block body %}
 <form method="post">
@@ -24,7 +24,7 @@
                 <div class="checkbox mb-3 form-check">
                     <input class="form-check-input" type="checkbox" name="_remember_me" id="remember_me">
                     <label class="form-check-label" for="remember_me">
-                        Se souvenier de moi
+                        Se souvenir de moi
                     </label>
                 </div>
                 <div>Mot de passe oublié ?
@@ -36,8 +36,8 @@
                 Connexion
             </button>
             
-            <p class="mb-3 mt-5 font-weight-normal text-center text-muted">Créer un compte
-                {# <a href="{{ path('app_register') }}" class="text-decoration-none">Créer un compte</a> #}
+            <p class="mb-3 mt-3 font-weight-normal text-center text-muted">
+                <a href="{{ path('app_register') }}" class="text-decoration-none">Inscrivez-vous!</a>
             </p>
         </div>
     </div>

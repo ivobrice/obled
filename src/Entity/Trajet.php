@@ -98,10 +98,12 @@ class Trajet
     private ?int $nbrePlaceArr = null;
 
     #[ORM\Column(length: 100, nullable: true)]
+    #[Assert\Length(max: 100, maxMessage: 'Maximum {{ limit }} caractères')]
     private ?string $prenom = null;
 
-    #[ORM\Column(length: 180)]
+    #[ORM\Column(length: 100)]
     #[Assert\NotBlank(message: 'Votre adresse email est indispensable pour recevoir les réservations des passagers')]
+    #[Assert\Length(max: 100, maxMessage: 'Maximum {{ limit }} caractères')]
     #[Assert\Email(
         message: '{{ value }} n\'est pas une adresse email valide.',
     )]
@@ -109,6 +111,7 @@ class Trajet
 
     #[ORM\Column(length: 30, nullable: true)]
     #[Assert\NotBlank(message: 'Votre numéro de téléphone est indispensable pour les passagers')]
+    #[Assert\Length(max: 30, maxMessage: 'Maximum {{ limit }} caractères')]
     private ?string $phone = null;
 
     #[ORM\Column(type: Types::DATE_MUTABLE, nullable: true)]

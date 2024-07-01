@@ -19,30 +19,35 @@
 {{ form_row(form.marqVoiture) }}
 {% if app.user and trajet.id is empty %}
 	{{ form_row(form.email, {'attr': {'value': app.user.email}}) }}
-	{{ form_row(form.phone, {'attr': {'value': app.user.phone}}) }}
+	{% if app.user.phone  %}
+		{{ form_row(form.phone, {'attr': {'value': app.user.phone}}) }}
+	{% else %}
+		{{ form_row(form.phone) }}
+	{% endif %}
 {% else %}
 	{{ form_row(form.email, {'attr': {'placeholder': 'Ex: kean@email.com (Obligatoire)'}}) }}
 	{{ form_row(form.phone) }}
 {% endif %}
-{% if app.user is empty or trajet.id %}
+{% if app.user is empty or app.user.prenom is empty or trajet.id %}
 	{{ form_row(form.prenom) }}
 {% endif %}
 {% if trajet.anneeNaiss %}
 	{{ form_row(form.anneeNaiss, {'attr': {'value': trajet.anneeNaiss|date("Y")}}) }}
+{% elseif app.user and  app.user.anneeNaiss %}
+	{{ form_row(form.anneeNaiss, {'attr': {'value': app.user.anneeNaiss|date("Y")}}) }}
 {% else %}
 	{{ form_row(form.anneeNaiss) }}
 {% endif %}
-{% if app.user and app.user.imageName and trajet.id is empty %}
-	photo
-	{# <img src="{{ vich_uploader_asset(app.user)|imagine_filter('my_thumb_small') }}" alt="{{ app.user.email }}" class="w-100 img-fluid"/> #}
-{% else %}
-	{{ form_row(form.imageFile) }}
+{% if app.user and app.user.imageName and trajet.imageName is empty %}
+	<img src="{{ vich_uploader_asset(app.user)|imagine_filter('my_thumb_small') }}" alt="{{ app.user.email }}" class="w-100 img-fluid"/>
 {% endif %}
+{{ form_row(form.imageFile) }}
+
 {% if trajet.id %}
 	{{ form_row(form.id, {'attr': {'value': trajet.id}}) }}
 	{{ form_row(form.hashedCode, {'attr': {'value': trajet.hashedCode}}) }}
 {% endif %}
 {{ form_row(form._token) }}
 
-<button class="btn">{{ button_label|default('Save') }}</button>
+<button class="btn btn-primary btn-lg btn-block">{{ button_label|default('Save') }}</button>
 {{ form_end(form, {render_rest: false}) }}

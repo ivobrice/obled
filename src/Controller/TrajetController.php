@@ -210,8 +210,11 @@ class TrajetController extends AbstractController
             $trajet->setDateDept($dateDept['dateDept']);
             if (empty($anneeNaiss['msgErrorNaiss']))
                 $trajet->setAnneeNaiss($anneeNaiss['anneeNaiss']);
-            if ($this->getUser())
+            if ($this->getUser()) {
                 $trajet->setUser($this->getUser());
+                // if (empty($trajet->getPrenom()) && !empty($this->getUser()->getPrenom()))
+                //     $trajet->setPrenom($this->getUser()->getPrenom());
+            }
             if (empty($trajet->getId())) {
                 $em->persist($trajet);
                 // $this->addFlash('success', 'Votre trajet à été publié en ligne avec succès');

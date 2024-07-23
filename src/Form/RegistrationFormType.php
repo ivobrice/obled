@@ -27,23 +27,29 @@ class RegistrationFormType extends AbstractType
                 'help' => 'Pas obligatoire.',
                 'required' => false
             ])
-            ->add('email')
+            ->add('email', null, [
+                'constraints' => [
+                    new NotBlank([
+                        'message' => 'Entrer votre adresse email.'
+                    ])
+                ],
+            ])
             ->add('plainPassword', RepeatedType::class, [
                 'type' => PasswordType::class,
                 'options' => [
                     'attr' => [
                         'autocomplete' => 'new-password',
-                        'class' => 'col-md-6',
+                        // 'class' => 'col-md-6',
                     ],
                 ],
                 'first_options' => [
                     'constraints' => [
                         new NotBlank([
-                            'message' => 'Entrer le mot de passe',
+                            'message' => 'Entrer le mot de passe.',
                         ]),
                         new Length([
                             'min' => 6,
-                            'minMessage' => 'Votre mot de passe doit avoir au moins {{ limit }} caractères',
+                            'minMessage' => 'Votre mot de passe doit avoir au moins {{ limit }} caractères.',
                             'max' => 4096,
                         ]),
                         // new PasswordStrength(),
@@ -52,7 +58,7 @@ class RegistrationFormType extends AbstractType
                     'label' => 'Mot de passe',
                 ],
                 'second_options' => [
-                    'label' => 'Repetez le mot de passe',
+                    'label' => 'Répétez le mot de passe',
                 ],
                 'invalid_message' => 'Les mots de passe doivent être identiques',
                 'mapped' => false,

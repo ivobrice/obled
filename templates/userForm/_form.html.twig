@@ -1,0 +1,35 @@
+{{ form_errors(registrationForm) }}
+
+{{ form_start(registrationForm) }}
+    <div class="row">
+        <div class="col-md-6">
+            {{ form_row(registrationForm.prenom) }}
+        </div>
+        <div class="col-md-6">
+            {{ form_row(registrationForm.email) }}
+        </div>
+    </div>
+    {% if user is empty %}
+        <div class="row">
+            {{ form_row(registrationForm.plainPassword) }}
+        </div>
+    {% endif %}
+    <div class="row">
+        <div class="col-md-6">
+            {{ form_row(registrationForm.phone) }}
+        </div>
+        <div class="col-md-6">
+            {{ form_row(registrationForm.anneeNaiss) }}
+        </div>
+    </div>
+    {{ form_row(registrationForm.imageFile) }}
+    {% if user is empty %}
+        {{ form_row(registrationForm.agreeTerms) }}
+    {% endif %}
+    <button type="submit" class="btn btn-primary btn-lg btn-block" formnovalidate>{{ button_label|default('Envoyer') }}</button>
+    {% if user is empty %}
+        {{ form_end(registrationForm) }}
+    {% else %}
+        {{ form_row(registrationForm._token) }}
+        {{ form_end(registrationForm, {render_rest: false}) }}
+    {% endif %}

@@ -14,11 +14,14 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Mailer\MailerInterface;
 use Symfony\Component\Mime\Address;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\ExpressionLanguage\Expression;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
 
 #[Route('/reservation')]
 class ReservationController extends AbstractController
 {
     #[Route('/dashboard', name: 'app_reservation_index', methods: ['GET'])]
+    #[IsGranted(new Expression('is_granted("ROLE_PARTNER") and is_granted("IS_AUTHENTICATED_FULLY")', null, 'Autorisation refusée.'))]
     public function dashboard(Request $request, EntityManagerInterface $em, ReservationRepository $rm): Response
     {
         $user = 1;
@@ -81,6 +84,7 @@ class ReservationController extends AbstractController
     }
 
     #[Route('/validation/{id}/{hashedCode}', name: 'app_reservation_validation', methods: ['GET'])]
+    #[IsGranted(new Expression('is_granted("ROLE_PARTNER") and is_granted("IS_AUTHENTICATED_FULLY")', null, 'Autorisation refusée.'))]
     public function validation($id = null, $hashedCode = null, BuildHashedCode $buildCode, EntityManagerInterface $em, ReservationRepository $rm, MailerInterface $mailer): Response
     {
         $user = 1;
@@ -140,6 +144,7 @@ class ReservationController extends AbstractController
     }
 
     #[Route('/trajet', name: 'app_reservation_trajet', methods: ['GET', 'POST'])]
+    // #[IsGranted(new Expression('is_granted("PUBLIC_ACCESS")'))]
     public function new(Request $request, EntityManagerInterface $em): Response
     {
         if ($request->isMethod('POST')) {
@@ -193,7 +198,7 @@ class ReservationController extends AbstractController
                 $this->addFlash('danger', 'Vos informations sont incomplètes');
             return $this->redirectToRoute('app_trajet');
         }
-        return $this->redirectToRoute('app_trajet');
+        return $this->redirectToRoute('app_trajet_index');
     }
 
     #[Route('/{id}', name: 'app_reservation_show', methods: ['GET'])]

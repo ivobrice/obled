@@ -12,8 +12,11 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\ExpressionLanguage\Expression;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
 
 #[Route('/profile')]
+#[IsGranted(new Expression('is_granted("ROLE_USER") and is_granted("IS_AUTHENTICATED_FULLY")'))]
 class AccountController extends AbstractController
 {
     #[Route('/index', name: 'app_account_index', methods: ['GET'])]

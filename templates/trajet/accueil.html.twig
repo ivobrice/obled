@@ -1,0 +1,96 @@
+{% extends 'base.html.twig' %}
+{% block body %}
+	<div class="vue-recherche">
+		<div class="cadreimage img-fluid border-bottom-0 border-top-0 border-right-0 border-left-0">
+			{#<img src="{{ asset('bundles/coligoitineraire/images/logo.svg') }}" alt="World First">#}
+			{#<img src="{{ asset('bundles/coligoitineraire/images/logoG.png') }}" alt="World First">#}
+				<div id="description-titre"> <div id="titre" class="d-none d-md-block d-lg-block d-xl-block">
+					<h1 id="titreh1">Voyagez Ôbled en covoiturage</h1>
+					<h6 class="text-success">
+						Trouvez une voiture qui vous amène dans la ville de votre choix à pétit prix
+					</h6>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div class="form_accueil shadow bg-light rounded">
+		<div class="content-form">
+			<form action="" method="get" class="form-inline">
+				<div id="form_bloc1" class="form-row">
+					<div class="form-group">
+						<label for="itineraire_villeDept"></label>
+						<div class="input-group">
+							<input type="text" name="villeDept" id="itineraire_villeDept" class="form-control font-weight-bold" style="color:#18424e;" placeholder="Ville de départ"/>
+							<i class="fa fa-location fa-lg fa-fw" aria-hidden></i>
+						</div>
+					</div>
+
+					<div class="form-group">
+						<label for="itineraire_villeArrv"></label>
+						<div class="input-group">
+							<input type="text" name="villeArrv" id="itineraire_villeArrv" class="form-control font-weight-bold" style="color:#18424e;" placeholder="Ville d'arrivée"/>
+						</div>
+					</div>
+
+					<div class="form-group">
+						<label for="dateDept"></label>
+						<div class="input-group">
+							<input type="date" name="dateDept" id="itineraire_dateDept" class="form-control font-weight-bold calendrier" style="color:#18424e;" placeholder="Date de Départ"/>
+						</div>
+					</div>
+
+					<div class="form-group">
+						<div id="form_Trouver"><input type="submit" class="form-control btn btn-primary font-weight-bold" value="Rechercher"/></div>
+					</div>
+				</div>
+			</form>
+		</div>
+	</div>
+
+</div>
+
+<div class="container-fluid">
+	<h3 id="content-bas-accueilh3" class="text-center border">Comment ça marche</h3>
+	<div class="row content-bas-accueil bg-light">
+		<div class="block col-xs-12 col-md-4">
+			<div class="card shadow-sm">
+				<div class="card-body">
+					<h6 id="h5trois" class="card-title text-center">Concept</h6>
+					<p class="card-text text-center">Un chauffeur voyage à l'intérieur du pays avec des places libres dans sa voiture. Il publie un trajet en ligne. Des passagers voyageant dans la même ville que lui réserver une ou plusieurs place(s) !</p>
+				</div>
+			</div>
+		</div>
+
+		<div class="block col-xs-12 col-md-4">
+			<div class="card shadow-sm">
+				<div class="card-body">
+					<h6 id="h5un" class="card-title text-center">Chauffeurs</h6>
+					<p class="card-text text-center">Vous êtes un chauffeur et vous voyager à l'intérieur du pays ? Si vous avez des places libres dans votre voiture, emmener des passagers qui se rendent dans la même ville que vous, et gagner de l'argent !</p>
+				</div>
+			</div>
+		</div>
+
+		<div class="block col-xs-12 col-md-4">
+			<div class="card shadow-sm">
+				<div class="card-body">
+					<h6 id="h5deux" class="card-title text-center">Passagers</h6>
+					<p class="card-text text-center">Vous souhaitez vous rendre à l'intérieur du pays ? Profitez des places libres dans la voiture d'un chauffeur qui se rend dans la même ville que vous et voyager en toute sereinité en payant moins chère !</p>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>{% endblock %}{% block javascripts %}
+{{ parent() }}
+<script>
+	function activateNamevilleDept() {
+var vd = document.getElementById('itineraire_villeDept');
+var va = document.getElementById('itineraire_villeArrv');
+var pd = document.getElementById('itineraire_paysDept');
+var pa = document.getElementById('itineraire_paysArrv');
+var autocomplete = new google.maps.places.Autocomplete(vd);
+var autocomplete = new google.maps.places.Autocomplete(va);
+var autocomplete = new google.maps.places.Autocomplete(pd);
+var autocomplete = new google.maps.places.Autocomplete(pa);
+}
+</script>
+<script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?key=AIzaSyD0HIGTUp1qUsxJ0xuMqFlJiA27TUaHKRs&libraries=places&callback=activateNamevilleDept"></script>{% endblock %}

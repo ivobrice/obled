@@ -57,10 +57,11 @@ class TrajetController extends AbstractController
             $sep = empty($dept['villeDept']) ? 'vers ' : ' - ';
             return $this->render('trajet/index.html.twig', ['title' => 'Trajet: ' . $dept['villeDept'] . $sep . $arrv['villeArrv'] . ' - Obled.fr', 'trajets' => $trajets]);
         } else {
-            $trajets = $em->getTrajetWithUsers('', 'toulouse', '', 'france', '2020-01-22');
-            if ($trajets)
-                $trajets = $this->dispatchEntity($trajets, '', 'Toulouse', '', 'France');
-            return $this->render('trajet/index.html.twig', [
+            // $trajets = $em->getTrajetWithUsers('', 'toulouse', '', 'france', '2020-01-22');
+            // if ($trajets)
+            //     $trajets = $this->dispatchEntity($trajets, '', 'Toulouse', '', 'France');
+            $trajets = null;
+            return $this->render('trajet/accueil.html.twig', [
                 'trajets' => $trajets, 'title' => 'Obled.fr',
             ]);
         }

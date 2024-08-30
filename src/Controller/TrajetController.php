@@ -62,7 +62,8 @@ class TrajetController extends AbstractController
             //     $trajets = $this->dispatchEntity($trajets, '', 'Toulouse', '', 'France');
             $trajets = null;
             return $this->render('trajet/accueil.html.twig', [
-                'trajets' => $trajets, 'title' => 'Obled.fr',
+                'trajets' => $trajets,
+                'title' => 'Obled.fr',
             ]);
         }
     }
@@ -183,7 +184,7 @@ class TrajetController extends AbstractController
                 }
                 $em->remove($trajet);
                 $em->flush();
-                // $this->addFlash('sup', 'Votre trajet à été supprimé avec succès');
+                $this->addFlash('danger', 'Votre trajet à été supprimé en ligne avec succès. Tous les passagers seront prévenus, et remboursés!');
             }
         }
         return $this->redirectToRoute('app_trajet_index', [], Response::HTTP_SEE_OTHER);
@@ -213,15 +214,15 @@ class TrajetController extends AbstractController
                 $trajet->setAnneeNaiss($anneeNaiss['anneeNaiss']);
             if ($this->getUser()) {
                 $trajet->setUser($this->getUser());
-                // if (empty($trajet->getPrenom()) && !empty($this->getUser()->getPrenom()))
-                //     $trajet->setPrenom($this->getUser()->getPrenom());
+                if (empty($trajet->getPrenom()) && !empty($this->getUser()->getPrenom()))
+                    $trajet->setPrenom($this->getUser()->getPrenom());
             }
             if (empty($trajet->getId())) {
                 $em->persist($trajet);
-                // $this->addFlash('success', 'Votre trajet à été publié en ligne avec succès');
+                $this->addFlash('success', 'Votre trajet à été créé et publié en ligne avec succès!');
             } else {
                 $trajet->setPublish(true);
-                // $this->addFlash('success', 'Votre trajet à été modifié avec succès');
+                $this->addFlash('success', 'Votre trajet à été modifié en ligne avec succès');
             }
             if ($hashedCodeTrajet = $trajet->getHashedCode()) {
                 $em->flush();
@@ -229,8 +230,11 @@ class TrajetController extends AbstractController
                 return $this->redirectToRoute(
                     'app_affiche_Entity',
                     [
-                        'page' => 'publication', 'villeDept' => $addDataPost['villeDept'], 'villeArrv' => $addDataPost['villeArrv'],
-                        'id' => $trajet->getId(), 'hashedCode' => $hashedCodeTrajet
+                        'page' => 'publication',
+                        'villeDept' => $addDataPost['villeDept'],
+                        'villeArrv' => $addDataPost['villeArrv'],
+                        'id' => $trajet->getId(),
+                        'hashedCode' => $hashedCodeTrajet
                     ],
                     Response::HTTP_SEE_OTHER
                 );

@@ -17,7 +17,12 @@
 		{# {% block importmap %}{{ importmap('app') }}{% endblock %} #}{% endblock %}
 	</head>
 	<body>
-		{{ include('partials/_flash_messages.html.twig') }}
-		{% block body %}{% endblock %}
+		<div class="container">
+			{{ include('partials/_flash_messages.html.twig') }}
+			{{ include('partials/_nav.html.twig') }}
+			{% block body %}{% endblock %}
+			{{ include('partials/_footer.html.twig') }}
+		</div>
+		{% block javascripts2 %}{% endblock %}
 	</body>
 </html>

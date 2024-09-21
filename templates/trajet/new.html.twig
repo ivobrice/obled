@@ -4,19 +4,33 @@
 	{% if trajet.id %}
 		Modifier votre Trajet!
 	{% else %}
-		New Trajet!
+		Nouveau Trajet!
 	{% endif %}
 {% endblock %}
 
 {% block body %}
+	<div class="row">
+		<div class="col-md-7 mx-auto">
+			{% if trajet.id %}
+				<h1 class="mb-3 text-center">Modifier votre Trajet</h1>
+				{{ include('trajet/_form.html.twig', {'button_label': 'Modifier votre Trajet'}) }}
+			{% else %}
+				<h1 class="mb-3 text-center">Créer votre trajet</h1>
+				{{ include('trajet/_form.html.twig') }}
+			{% endif %}
+		</div>
+	</div>
+{% endblock %}
 
-	{% if trajet.id %}
-		<h1>Modifier votre Trajet</h1>
-		{{ include('trajet/_form.html.twig', {'button_label': 'Update'}) }}
-	{% else %}
-		<h1>Create new Trajet</h1>
-		{{ include('trajet/_form.html.twig') }}
-	{% endif %}
-
-	<a href="{{ path('app_trajet_index') }}">back to list</a>
+{% block javascripts2 %}
+	{{ parent() }}
+	<script>
+		function activateNamevilleDept() {
+var vd = document.getElementById('trajet_villeDept');
+var va = document.getElementById('trajet_villeArrv');
+var autocomplete = new google.maps.places.Autocomplete(vd);
+var autocomplete = new google.maps.places.Autocomplete(va);
+}
+	</script>
+	<script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?key=AIzaSyD0HIGTUp1qUsxJ0xuMqFlJiA27TUaHKRs&libraries=places&callback=activateNamevilleDept"></script>
 {% endblock %}

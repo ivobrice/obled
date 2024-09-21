@@ -17,27 +17,27 @@ class TrajetType extends AbstractType
     {
         $builder
             ->add('villeDept', null, [
-                'attr' => ['placeholder' => 'Ex: Lyon, France'],
-                'label' => 'Votre ville de Départ',
+                'attr' => ['id' => 'itineraire_villeDept', 'placeholder' => 'Lyon, France'],
+                'label' => 'Votre ville de départ',
                 'required' => false
             ])
             ->add('villeArrv', null, [
-                'attr' => ['placeholder' => 'Ex: Toulouse, France'],
+                'attr' => ['id' => 'itineraire_villeArrv', 'placeholder' => 'Toulouse, France'],
                 'label' => 'Votre ville d\'arrivée',
                 'required' => false
             ])
             ->add('dateDept', TextType::class, [
-                'attr' => ['placeholder' => 'Ex: 29/04/2017'],
-                'label' => 'Votre date de Départ',
+                'attr' => ['type' => 'datetime'],
+                'label' => 'Date de départ',
                 'mapped' => false,
                 'required' => false
             ])
             ->add('heureDept', null, [
-                'label' => 'Heure de Départ',
+                'label' => 'Heures',
                 'required' => false
             ])
             ->add('minuteDept', null, [
-                'label' => 'Minute',
+                'label' => 'Minutes',
                 'required' => false
             ])
             ->add('nbrDePlace', null, [
@@ -45,57 +45,55 @@ class TrajetType extends AbstractType
                 'required' => false
             ])
             ->add('prixPlace', null, [
-                'attr' => ['placeholder' => 'Ex: 25000'],
+                'attr' => ['placeholder' => '25000'],
                 'label' => 'Prix d\'une place',
                 'help' => '0 si les places sont gratuites pour les passagers!',
                 'required' => false
             ])
             ->add('rendezVsDept', null, [
-                'attr' => ['placeholder' => 'Ex: Carrefoure Bellecoure'],
-                'label' => 'Lieu de rendez-vous au départ avec les passagers',
+                'attr' => ['placeholder' => 'Carrefoure Bellecoure'],
+                'label' => 'Lieu du rendez-vous avec avec les passagers au départ ',
                 'required' => false
             ])
             ->add('rendezVsArrv', null, [
-                'attr' => ['placeholder' => 'Ex: Métro Arènes (Facultatif)'],
-                'label' => 'Lieu de dépôt des passagers à l\'arrivée',
+                'attr' => ['placeholder' => 'Métro Arènes (Facultatif)'],
+                'label' => 'Lieu du dépôt des passagers à l\'arrivée',
                 'required' => false
             ])
             ->add('description', null, [
                 'label' => 'Description de votre déplacement',
-                'data' => 'Ex: Je pars dans le sud, j\'ai peu de place dans le coffre...
+                'data' => 'Je pars dans le sud, j\'ai peu de place dans le coffre...
                 Chaque passager devra avoir un bagage moyen',
                 'required' => false
             ])
             ->add('restrictions', null, [
-                'label' => 'Restrictions lors du déplacement',
-                'data' => 'Pas d\'animaux
-                Pas de produits illicites
-                Pas d\'objet ne pouvant suffire dans la voiture.',
+                'label' => 'Condictions du Voyage',
+                'data' => 'Un bagage moyen par passager, voyage non fumeur, pas d\'animaux, pas de produits illicites, pas d\'objet ne pouvant suffire dans la voiture.',
                 'required' => false
             ])
             ->add('marqVoiture', null, [
-                'attr' => ['placeholder' => 'Ex: Renault 3000 (Facultatif)'],
+                'attr' => ['placeholder' => 'Renault 300'],
                 'label' => 'Marque de votre voiture',
                 'required' => false
             ])
             ->add('email', null, [
-                'label' => 'Votre email',
+                'label' => 'Email',
                 'help' => 'Obligatoire pour recevoir les réservations des passagers!',
                 'required' => false
             ])
             ->add('phone', null, [
-                'attr' => ['placeholder' => 'Ex: 07532214 (Obligatoire)'],
-                'label' => 'Numéro de téléphone',
+                'attr' => ['placeholder' => '07532214 (Obligatoire)'],
+                'label' => 'Téléphone',
                 'help' => 'Obligatoire pour être contacté par les passagers!',
                 'required' => false
             ])
             ->add('prenom', null, [
-                'attr' => ['placeholder' => 'Ex: Kean (Facultatif)'],
+                'attr' => ['placeholder' => 'Kean (Facultatif)'],
                 'label' => 'Prénom',
                 'required' => false
             ])
             ->add('anneeNaiss', TextType::class, [
-                'attr' => ['placeholder' => 'Ex: 1990 (Facultatif)'],
+                'attr' => ['placeholder' => '1990 (Facultatif)'],
                 'label' => 'Année de naissance',
                 'mapped' => false,
                 'required' => false
@@ -103,7 +101,7 @@ class TrajetType extends AbstractType
             ->add('codeUser', null, [
                 'label' => 'code du trajet',
                 'mapped' => false,
-                'attr' => ['placeholder' => 'Ex: a4dd97eF'],
+                'attr' => ['placeholder' => 'a4dd97eF'],
                 'required' => false
             ])
             ->add('id', HiddenType::class, ['mapped' => false])

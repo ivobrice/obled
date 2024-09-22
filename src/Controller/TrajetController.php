@@ -62,7 +62,8 @@ class TrajetController extends AbstractController
             //     $trajets = $this->dispatchEntity($trajets, '', 'Toulouse', '', 'France');
             $trajets = null;
             return $this->render('trajet/accueil.html.twig', [
-                'trajets' => $trajets, 'title' => 'Obled.fr',
+                'trajets' => $trajets,
+                'title' => 'Obled.fr',
             ]);
         }
     }
@@ -93,7 +94,7 @@ class TrajetController extends AbstractController
     public function new(Request $request, EntityManagerInterface $em): Response
     {
         $addDataPost = [];
-        $trajet = (!empty($trajet)) ? $trajet : new Trajet;
+        $trajet = new Trajet;
         $form = $this->createForm(TrajetType::class, $trajet);
         if ($request->isMethod('POST')) {
             $addDataPost = $this->checkValidityOfValuesPost($request, $form, $trajet, $em);
@@ -183,7 +184,7 @@ class TrajetController extends AbstractController
                 }
                 $em->remove($trajet);
                 $em->flush();
-                // $this->addFlash('sup', 'Votre trajet à été supprimé avec succès');
+                $this->addFlash('danger', 'Votre trajet à été supprimé en ligne avec succès. Tous les passagers seront prévenus, et remboursés!');
             }
         }
         return $this->redirectToRoute('app_trajet_index', [], Response::HTTP_SEE_OTHER);
@@ -193,7 +194,7 @@ class TrajetController extends AbstractController
     {
         $post = $request->request->all('trajet');
         foreach ($post as $key => $value)
-            $post[$key] = is_string($value) ? nl2br($value) : $value;
+            $post[$key] = $key == 'restrictions' ? nl2br($value) : $value;
         $request->request->set('trajet', $post);
         $dept = $this->formateVille($post['villeDept'], 'Dept', 'Entrer votre ville de départ et le pays départ (ex: Francfort, Allemagne)');
         $arrv = $this->formateVille($post['villeArrv'], 'Arrv', 'Entrer la ville d\'arrivée et le pays d\'arrivée (ex. Londres, Royaume-Uni)');
@@ -209,28 +210,38 @@ class TrajetController extends AbstractController
             $trajet->setPaysDept($dept['paysDept']);
             $trajet->setPaysArrv($arrv['paysArrv']);
             $trajet->setDateDept($dateDept['dateDept']);
-            if (empty($anneeNaiss['msgErrorNaiss']))
-                $trajet->setAnneeNaiss($anneeNaiss['anneeNaiss']);
+            $trajet->setAnneeNaiss($anneeNaiss['anneeNaiss']);
             if ($this->getUser()) {
                 $trajet->setUser($this->getUser());
-                // if (empty($trajet->getPrenom()) && !empty($this->getUser()->getPrenom()))
-                //     $trajet->setPrenom($this->getUser()->getPrenom());
+                if (empty($trajet->getPrenom()) && !empty($this->getUser()->getPrenom()))
+                    $trajet->setPrenom($this->getUser()->getPrenom());
             }
             if (empty($trajet->getId())) {
                 $em->persist($trajet);
-                // $this->addFlash('success', 'Votre trajet à été publié en ligne avec succès');
+                $this->addFlash('success', 'Votre trajet à été créé et publié en ligne avec succès!');
             } else {
                 $trajet->setPublish(true);
-                // $this->addFlash('success', 'Votre trajet à été modifié avec succès');
+                $this->addFlash('success', 'Votre trajet à été modifié en ligne avec succès!');
             }
             if ($hashedCodeTrajet = $trajet->getHashedCode()) {
                 $em->flush();
                 dd($trajet);
+                if ($this->getUser()) {
+                    $email = (new TemplatedEmail())
+                        ->from(new Address('admin@obled.com', 'Partner'))
+                        ->to($reservation->getMailPassager())
+                        ->subject('Création de votre trajet!')
+                        ->htmlTemplate('trajet/email_create_trajet.html.twig');
+                    $mailer->send($email);
+                }
                 return $this->redirectToRoute(
                     'app_affiche_Entity',
                     [
-                        'page' => 'publication', 'villeDept' => $addDataPost['villeDept'], 'villeArrv' => $addDataPost['villeArrv'],
-                        'id' => $trajet->getId(), 'hashedCode' => $hashedCodeTrajet
+                        'page' => 'publication',
+                        'villeDept' => $addDataPost['villeDept'],
+                        'villeArrv' => $addDataPost['villeArrv'],
+                        'id' => $trajet->getId(),
+                        'hashedCode' => $hashedCodeTrajet
                     ],
                     Response::HTTP_SEE_OTHER
                 );

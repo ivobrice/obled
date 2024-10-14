@@ -2,12 +2,12 @@
 
 namespace App\Twig\Extension;
 
-use App\Twig\Runtime\DateDeptBuiltRuntime;
+use App\Twig\Runtime\AppTwigRuntime;
 use Twig\Extension\AbstractExtension;
 use Twig\TwigFilter;
 use Twig\TwigFunction;
 
-class DateDeptBuiltExtension extends AbstractExtension
+class AppTwigExtension extends AbstractExtension
 {
     public function getFilters(): array
     {
@@ -15,14 +15,14 @@ class DateDeptBuiltExtension extends AbstractExtension
             // If your filter generates SAFE HTML, you should add a third
             // parameter: ['is_safe' => ['html']]
             // Reference: https://twig.symfony.com/doc/3.x/advanced.html#automatic-escaping
-            new TwigFilter('dateTranf', [DateDeptBuiltRuntime::class, 'doSomething']),
+            new TwigFilter('dateTranf', [AppTwigRuntime::class, 'doSomething']),
         ];
     }
 
     public function getFunctions(): array
     {
         return [
-            new TwigFunction('function_name', [DateDeptBuiltRuntime::class, 'doSomething']),
+            new TwigFunction('pluralize', [AppTwigRuntime::class, 'pluralize']),
         ];
     }
 }

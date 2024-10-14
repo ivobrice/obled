@@ -1,4 +1,9 @@
 {% extends 'base.html.twig' %}
+
+{% block title %}
+	{{ title }}
+{% endblock %}
+
 {% block body %}
 	<div class="vue-recherche mb-3">
 		<div class="cadreimage img-fluid border-bottom-0 border-top-0 border-right-0 border-left-0">
@@ -6,8 +11,10 @@
 			{#<img src="{{ asset('bundles/coligoitineraire/images/logoG.png') }}" alt="World First">#}
 				<div id="description-titre"> <div id="titre" class="text-center d-none d-md-block d-lg-block d-xl-block">
 					<h1 id="titreh1">Voyagez ôbled en covoiturage</h1>
-					<h6 class="text-success">
-						Trouve une voiture qui t'enmène dans la ville de ton choix.
+					<h6
+						class="text-success">
+						{# Trouve une voiture qui t'enmène dans la ville de ton choix. #}
+						Trouve une voiture pour te rendre dans la ville de ton choix.
 					</h6>
 				</div>
 			</div>
@@ -55,7 +62,7 @@
 				<div class="card shadow-sm">
 					<div class="card-body">
 						<h6 id="h5trois" class="card-title text-center">Concept</h6>
-						<p class="card-text text-center">Un chauffeur voyage à l'intérieur du pays et a des places libres dans sa voiture. Il publie un trajet en ligne. Des passagers souhaitant voyager dans la même ville que lui réservent une ou plusieurs places!</p>
+						<p class="card-text text-center">Un chauffeur voyage à l'intérieur du pays avec des places libres dans sa voiture. Il publie un trajet en ligne! Des passagers qui souhaitent voyager dans la même ville que lui réservent une ou plusieurs places!</p>
 					</div>
 				</div>
 			</div>
@@ -63,7 +70,7 @@
 			<div class="block col-xs-12 col-md-4">
 				<div class="card shadow-sm">
 					<div class="card-body">
-						<h6 id="h5un" class="card-title text-center">Chauffeurs</h6>
+						<h6 id="h5un" class="card-title text-center">Conducteurs</h6>
 						<p class="card-text text-center">Vous êtes un chauffeur et vous voyager à l'intérieur du pays. Vous avez des places libres dans votre voiture? emmener des passagers qui se rendent dans la même ville que vous, et gagner de l'argent!</p>
 					</div>
 				</div>

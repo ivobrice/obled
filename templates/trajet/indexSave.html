@@ -1,0 +1,82 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Trajet index{% endblock %}
+
+{% block body %}
+<p class="card-text">
+    <small class="text-body-secondary">Last updated 3 mins ago</small>
+</p>
+<h1>Trajet index</h1>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Id</th>
+            <th>VilleDept</th>
+            <th>VilleArrv</th>
+            <th>PaysDept</th>
+            <th>PaysArrv</th>
+            <th>DateDept</th>
+            <th>NbrDePlace</th>
+            <th>PrixPlace</th>
+            <th>RendezVsDept</th>
+            <th>RendezVsArrv</th>
+            <th>Description</th>
+            <th>Restrictions</th>
+            <th>MarqVoiture</th>
+            <th>NbrePlaceArr</th>
+            <th>Prenom</th>
+            <th>Email</th>
+            <th>Phone</th>
+            <th>AnneeNaiss</th>
+            <th>CreatedAt</th>
+            <th>UpdatedAt</th>
+            <th>Publish</th>
+            <th>CodeUser</th>
+            <th>HashedCode</th>
+            <th>HashedCode2</th>
+            <th>actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for trajet in trajets %}
+        <tr>
+            <td>{{ trajet.id }}</td>
+            <td>{{ trajet.villeDept }}</td>
+            <td>{{ trajet.villeArrv }}</td>
+            <td>{{ trajet.paysDept }}</td>
+            <td>{{ trajet.paysArrv }}</td>
+            <td>{{ trajet.dateDept ? trajet.dateDept|dateTranf : '' }}</td>
+            <td>{{ trajet.nbrDePlace }}</td>
+            <td>{{ trajet.prixPlace }}</td>
+            <td>{{ trajet.rendezVsDept }}</td>
+            <td>{{ trajet.rendezVsArrv }}</td>
+            <td>{{ trajet.description }}</td>
+            <td>{{ trajet.restrictions }}</td>
+            <td>{{ trajet.marqVoiture }}</td>
+            <td>{{ trajet.nbrePlaceArr }}</td>
+            <td>{{ trajet.prenom }}</td>
+            <td>{{ trajet.email }}</td>
+            <td>{{ trajet.phone }}</td>
+            <td>{{ trajet.anneeNaiss ? trajet.anneeNaiss|date('Y-m-d') : '' }}</td>
+            <td>{{ trajet.createdAt ? trajet.createdAt|date('Y-m-d H:i:s') : '' }}</td>
+            <td>{{ trajet.updatedAt ? trajet.updatedAt|date('Y-m-d H:i:s') : '' }}</td>
+            <td>{{ trajet.publish ? 'Yes' : 'No' }}</td>
+            <td>{{ trajet.codeUser }}</td>
+            <td>{{ trajet.hashedCode }}</td>
+            <td>{{ trajet.hashedCode2 }}</td>
+            <td>
+                {# <a href="{{ path('app_trajet_show', {'id': trajet.id}) }}">show</a> #}
+                <a href="{{ path('app_trajet_edit', {'id': trajet.id}) }}">edit</a>
+            </td>
+        </tr>
+        {% else %}
+        <tr>
+            <td colspan="25">no records found</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<a href="{{ path('app_trajet_new') }}">Create new</a>
+{% endblock %}

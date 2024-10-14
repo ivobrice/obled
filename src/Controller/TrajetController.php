@@ -47,20 +47,19 @@ class TrajetController extends AbstractController
     #[Route('/', name: 'app_trajet_index', methods: ['GET'])]
     public function index(Request $request, TrajetRepository $em): Response
     {
+        $trajets = null;
         if (!empty($request->query->get('villeArrv'))) {
             $dept = $this->formateVille($request->query->get('villeDept'), 'Dept');
             $arrv = $this->formateVille($request->query->get('villeArrv'), 'Arrv');
             $dateDept = $this->formateDate($request->query->get('dateDept'), 'GET');
-            $trajets = $em->getTrajetWithUsers($dept['villeDept'], $arrv['villeArrv'], $dept['paysDept'], $arrv['paysArrv'], $dateDept);
-            if ($trajets)
+            if ($trajets = $em->getTrajetWithUsers($dept['villeDept'], $arrv['villeArrv'], $dept['paysDept'], $arrv['paysArrv'], $dateDept))
                 $trajets = $this->dispatchEntity($trajets, $dept['villeDept'], $arrv['villeArrv'], $dept['paysDept'], $arrv['paysArrv']);
             $sep = empty($dept['villeDept']) ? 'vers ' : ' - ';
-            return $this->render('trajet/index.html.twig', ['title' => 'Trajet: ' . $dept['villeDept'] . $sep . $arrv['villeArrv'] . ' - Obled.fr', 'trajets' => $trajets]);
+            return $this->render('trajet/index.html.twig', ['trajets' => $trajets, 'title' => 'Trajet - ' . $dept['villeDept'] . $sep . $arrv['villeArrv'] . ' - Obled.fr', 'villeDept' => $dept['villeDept'], 'villeArrv' => $arrv['villeArrv']]);
         } else {
             // $trajets = $em->getTrajetWithUsers('', 'toulouse', '', 'france', '2020-01-22');
             // if ($trajets)
             //     $trajets = $this->dispatchEntity($trajets, '', 'Toulouse', '', 'France');
-            $trajets = null;
             return $this->render('trajet/accueil.html.twig', [
                 'trajets' => $trajets,
                 'title' => 'Obled.fr',

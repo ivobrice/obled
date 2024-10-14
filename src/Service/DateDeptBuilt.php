@@ -13,9 +13,25 @@ class DateDeptBuilt
         $currentDate = new \Datetime();
         $interval = $dateDept->diff($currentDate);
         $sem = [
-            'Mon.' => 'Lun.', 'Tue.' => 'Mar.', 'Wed.' => 'Mer.', 'Thu.' => 'Jeu.', 'Fri.' => 'Ven.', 'Sat.' => 'Sam.', 'Sun.' => 'Dim.',
-            'Jan.' => 'Jan.', 'Feb.' => 'Fév.', 'Mar.' => 'Mar.', 'Apr.' => 'Avr.', 'May.' => 'Mai.', 'Jun.' => 'Juin.', 'Jul.' => 'Juil.',
-            'Aug.' => 'Août.', 'Sep.' => 'Sep.', 'Oct.' => 'Oct.', 'Nov.' => 'Nov.', 'Dec.' => 'Déc.'
+            'Mon.' => 'Lun.',
+            'Tue.' => 'Mar.',
+            'Wed.' => 'Mer.',
+            'Thu.' => 'Jeu.',
+            'Fri.' => 'Ven.',
+            'Sat.' => 'Sam.',
+            'Sun.' => 'Dim.',
+            'Jan.' => 'Jan.',
+            'Feb.' => 'Fév.',
+            'Mar.' => 'Mar.',
+            'Apr.' => 'Avr.',
+            'May.' => 'Mai.',
+            'Jun.' => 'Juin.',
+            'Jul.' => 'Juil.',
+            'Aug.' => 'Août.',
+            'Sep.' => 'Sep.',
+            'Oct.' => 'Oct.',
+            'Nov.' => 'Nov.',
+            'Dec.' => 'Déc.'
         ];
         if ($interval->format('%a') == 0 or $interval->format('%a') == 1) {
             if ($interval->format('%a') == 0) {

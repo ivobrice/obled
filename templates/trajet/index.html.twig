@@ -1,79 +1,68 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Trajet index{% endblock %}
+{% block title %}
+	{{ title }}
+{% endblock %}
 
 {% block body %}
-    <h1>Trajet index</h1>
+	<div class="row">
+		<div class="col-md-7 mt-3 mx-auto">
+			<h1 class="text-center mb-4">
+				{{ villeDept }}
+				-
+				{{ villeArrv }}</h1>
 
-    <table class="table">
-        <thead>
-            <tr>
-                <th>Id</th>
-                <th>VilleDept</th>
-                <th>VilleArrv</th>
-                <th>PaysDept</th>
-                <th>PaysArrv</th>
-                <th>DateDept</th>
-                <th>NbrDePlace</th>
-                <th>PrixPlace</th>
-                <th>RendezVsDept</th>
-                <th>RendezVsArrv</th>
-                <th>Description</th>
-                <th>Restrictions</th>
-                <th>MarqVoiture</th>
-                <th>NbrePlaceArr</th>
-                <th>Prenom</th>
-                <th>Email</th>
-                <th>Phone</th>
-                <th>AnneeNaiss</th>
-                <th>CreatedAt</th>
-                <th>UpdatedAt</th>
-                <th>Publish</th>
-                <th>CodeUser</th>
-                <th>HashedCode</th>
-                <th>HashedCode2</th>
-                <th>actions</th>
-            </tr>
-        </thead>
-        <tbody>
-        {% for trajet in trajets %}
-            <tr>
-                <td>{{ trajet.id }}</td>
-                <td>{{ trajet.villeDept }}</td>
-                <td>{{ trajet.villeArrv }}</td>
-                <td>{{ trajet.paysDept }}</td>
-                <td>{{ trajet.paysArrv }}</td>
-                <td>{{ trajet.dateDept ? trajet.dateDept|dateTranf : '' }}</td>
-                <td>{{ trajet.nbrDePlace }}</td>
-                <td>{{ trajet.prixPlace }}</td>
-                <td>{{ trajet.rendezVsDept }}</td>
-                <td>{{ trajet.rendezVsArrv }}</td>
-                <td>{{ trajet.description }}</td>
-                <td>{{ trajet.restrictions }}</td>
-                <td>{{ trajet.marqVoiture }}</td>
-                <td>{{ trajet.nbrePlaceArr }}</td>
-                <td>{{ trajet.prenom }}</td>
-                <td>{{ trajet.email }}</td>
-                <td>{{ trajet.phone }}</td>
-                <td>{{ trajet.anneeNaiss ? trajet.anneeNaiss|date('Y-m-d') : '' }}</td>
-                <td>{{ trajet.createdAt ? trajet.createdAt|date('Y-m-d H:i:s') : '' }}</td>
-                <td>{{ trajet.updatedAt ? trajet.updatedAt|date('Y-m-d H:i:s') : '' }}</td>
-                <td>{{ trajet.publish ? 'Yes' : 'No' }}</td>
-                <td>{{ trajet.codeUser }}</td>
-                <td>{{ trajet.hashedCode }}</td>
-                <td>{{ trajet.hashedCode2 }}</td>
-                <td>
-                    {# <a href="{{ path('app_trajet_show', {'id': trajet.id}) }}">show</a> #}
-                    <a href="{{ path('app_trajet_edit', {'id': trajet.id}) }}">edit</a>
-                </td>
-            </tr>
-        {% else %}
-            <tr>
-                <td colspan="25">no records found</td>
-            </tr>
-        {% endfor %}
-        </tbody>
-    </table>
-
-    <a href="{{ path('app_trajet_new') }}">Create new</a>
+			{% if trajets|length >= 0 %}
+				<h4 class="text-muted">{{ pluralize(trajets|length, 'trajet', 'trajets') }}</h4>
+			{% endif %}
+			{% for trajet in trajets %}
+				<div class="mb-3">
+					<a class="link_annonces text-decoration-none" href="{{ path('app_trajet_show', { 'id': trajet.id, 'villeDept': trajet.villeDept, 'villeArrv': trajet.villeArrv }) }}">
+						<div class="list-group list-group-flush rounded shadow">
+							<div class="list-group-item p-1 d-flex justify-content-end">
+								<h5 class="col-xs-6 col-sm-6 col-md-6 card-title text-center col align-self-center">{{ trajet.dateDept|dateTranf }}</h5>
+								<h3 class="col-xs-3 col-sm-3 col-md-3 card-title text-sm-center text-md-end">{{ trajet.prixPlace }}
+									FCFA</h3>
+							</div>
+							<div class="list-group-item">
+								<div class="row align-items-center d-flex justify-content">
+									<div class="col-md-3 p-2 align-items-center d-flex justify-content">
+										<div class="mw-100 rounded overflow-hidden">
+											{% if trajet.user.imageName is defined %}
+												{% set imageName, entity = trajet.user.imageName, trajet.user %}
+											{% elseif trajet.imageName is defined %}
+												{% set imageName, entity = trajet.imageName, trajet %}
+											{% endif %}
+											<img src="{{ (imageName ? vich_uploader_asset(entity) : asset('build/images/apple.png')) | imagine_filter('my_thumb_small') }}" alt="{{ entity.email }}" class="w-100 img-fluid rounded-start"/>
+										</div>
+										{% if trajet.prenom or trajet.user.prenom %}
+											<h6 class="card-title">
+												{% if trajet.prenom %}
+													{{ trajet.prenom }}
+												{% elseif trajet.user.prenom %}
+													{{ trajet.user.prenom }}
+												{% endif %}
+											</h6>
+										{% endif %}
+									</div>
+									<div class="col-md-9 p-0 d-flex justify-content-between">
+										<div class="col-md-8">
+											<h5 class="card-title text-xs-start text-md-center">{{ trajet.villeDept }}
+												-
+												{{ trajet.villeArrv }}</h5>
+										</div>
+										<div class="col-md-4">
+											<h5 class="card-title text-xs-end text-md-center">{{ pluralize(trajet.nbrDePlace, 'place', 'places') }}</h5>
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+					</a>
+				</div>
+			{% else %}
+				<h6 class="card-title">Pas encore de trajets disponibles pour cette destination.</h6>
+			{% endfor %}
+		</div>
+	</div>
 {% endblock %}
